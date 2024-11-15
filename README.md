@@ -34,7 +34,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 -->
-<h3 align="center">Personal Repo</h3>
+<h3 align="center">Personal Repository</h3>
 
   <p align="center">
     This is where i keep all my personal projects that don't have a dedicated repo.
