@@ -1,0 +1,32 @@
+ATENCION!
+
+Este ejemplo  soporta  SOLO  Microsoft Visual Basic 6.  Para ver un ejemplo con
+.NET consulte en la carpeta C#.
+
+Si  desea  usar  uFMOD  en  una  aplicacion  en  VB6,  tendra que completar los
+siguientes pasos:
+
+1. Debe incluir uF_vb.bas (para WINMM) o  DSuF_vb.bas (DirectX) en su proyecto.
+   No cambie el nombre de este archivo, ni modifique su contenido. Coloquelo en
+   la  carpeta  principal  del  proyecto.  Copie   ufmod.lib   (para  WINMM)  o
+   dsufmod.lib  (DirectX)  en  la  misma carpeta donde se encuentra uF_vb.bas o
+   DSuF_vb.bas. Copie DSOUND.TLB tambien, si va a usar la version para DirectX.
+
+2. El tipo de proyecto tiene que ser ejecutable nativo (EXE). ?Nada de p-code!
+
+3. Busque  la  carpeta  donde se encuentra instalado  VB6.EXE. (Generalmente se
+   encuentra en \Archivos de programa\Microsoft Visual Studio\VB98\.) Cambie el
+   nombre  de  LINK.EXE  por  LNK.EXE.  Copie en esa carpeta el archivo adjunto
+   link.exe.  El codigo fuente completo  de  link.exe  se  incluye  por  si  le
+   interesa  saber  como  funciona.  El  linker  modificado  sirve para generar
+   cualquier tipo de  aplicacion: con o sin  uFMOD. Sin embargo, siempre  podra
+   recuperar el linker original (LNK.EXE), en caso de que decida hacerlo.
+
+uFMOD  puede reproducir  ficheros, recursos y arreglos en memoria. Sin embargo,
+no hay una forma  practica para  usar arreglos  estaticos en  VB6. Aunque en el
+foro  oficial  de  uFMOD  hay  un  ejemplo,  este  involucra  demasiada memoria
+adicional y constituye solo una brueba de concepto, mas no un ejemplo real. Por
+lo  tanto,  si  desea  embeber la pista XM  directamente  en el ejecutable,  es
+preferible usar recursos, como en los ejemplos incluidos.
+
+?Eso es todo!

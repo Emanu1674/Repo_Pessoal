@@ -1,0 +1,20 @@
+$Include "uFMOD.inc"
+
+STRING filename
+POINTER pFile
+CuFMOD song
+
+filename = GETSTARTPATH + "mini.xm"
+pFile = filename
+
+song.PlaySong(pFile, 0, @XM_FILE)
+
+openconsole
+
+Print song.GetTitle()
+Print
+PRINT "Press Any Key To Close"
+DO
+UNTIL INKEY$ <> ""
+CLOSECONSOLE
+END

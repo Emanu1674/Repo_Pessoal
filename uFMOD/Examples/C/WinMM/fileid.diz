@@ -1,0 +1,27 @@
+uFMOD WINMM C Projects
+----------------------
+
+Public source code release. Provided AS IS.
+(C) 2005 - 2008 Asterix and Quantum.
+All rights reserved.
+
+The following compilers are supported:
+
+[*] Microsoft Visual C++ 2008 Express Edition
+    UFMOD_2K8.SLN
+        [->] PLAYER_2K8.VCPROJ  : A simple XM player
+        [->] JMP2PAT_2K8.VCPROJ : uFMOD_Jump2Pattern example
+
+[*] Microsoft Visual C++ 2005 Express Edition
+    UFMOD_2K5.SLN
+        [->] PLAYER_2K5.VCPROJ  : A simple XM player
+        [->] JMP2PAT_2K5.VCPROJ : uFMOD_Jump2Pattern example
+
+[*] Microsoft Visual C++ 6.0
+    UFMOD.DSW
+        [->] PLAYER.DSP         : A simple XM player
+        [->] JMP2PAT.DSP        : uFMOD_Jump2Pattern example
+
+[*] Bloodshed Dev-C++ 4.9.9.2
+        [->] PLAYER.DEV         : A simple XM player
+        [->] JMP2PAT.DEV        : uFMOD_Jump2Pattern example
