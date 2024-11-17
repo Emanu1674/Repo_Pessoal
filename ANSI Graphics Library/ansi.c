@@ -25,7 +25,7 @@
 //    linha por linha, ao invés de caractere por caractere (muito lento).
 //
 
-void fillScreen(int color, int bgcolor, const char *block){
+void fillScreen(int color, int bgcolor, char *block){
     char* bufferX = malloc(WIDTH * strlen(block));
     //if (bufferX == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
     for(int i = 0 ; i < WIDTH ; i++)
