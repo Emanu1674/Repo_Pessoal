@@ -25,7 +25,24 @@
 //    linha por linha, ao invés de caractere por caractere (muito lento).
 //
 
-void fillScreen(int color, int bgcolor, char *block){
+void fillScreen(int _FGColor, int _BGColor, char* _Char);
+void drawRectangle(int _xPos, int _yPos, int _FGColor, int _BGColor, char* _Char);
+void drawPixel(int _xPos, int _yPos, int _FGColor, int _BGColor, char* _Char);
+
+int main(){
+    setlocale(LC_ALL, "en_us.UTF-8");
+    fillScreen(34, 30, u8"█");
+    //drawPixel(18, 5, 33, 31, u8"▄");
+    //setColor(18, 5, 33, 31);
+    getchar();
+    system(CLEAR);
+    return 0;
+}
+
+void bufferScreen(){
+}
+
+void fillScreen(int color, int bgcolor, char* block){
     char* bufferX = malloc(WIDTH * strlen(block));
     //if (bufferX == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
     for(int i = 0 ; i < WIDTH ; i++)
@@ -37,21 +54,24 @@ void fillScreen(int color, int bgcolor, char *block){
     free(bufferX);
 }
 
-void drawPixel(int x, int y, int color, int bgcolor, const char *block){
+void drawRectangle(int x, int y, int color, int bgcolor, char* block){
+    char* bufferX = malloc(WIDTH * strlen(block));
+    //if (bufferX == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
+    for(int i = 0 ; i < WIDTH ; i++)
+        strncpy(bufferX + i * strlen(block), block, strlen(block));
+    printf("\033[%d;%dm", color, bgcolor+10);
+    for(int H = 1 ; H <= HEIGHT ; H++)
+        printf("\033[%d;%dH%s", H, 1, bufferX);
+    printf("\033[0m");
+    free(bufferX);
+}
+
+void drawPixel(int x, int y, int color, int bgcolor, char* block){
     printf("\033[%d;%dm", color, bgcolor+10);
     printf("\033[%d;%dH%s", y, x, block);
     printf("\033[0m");
 }
 
-int main(){
-    setlocale(LC_ALL, "en_us.UTF-8");
-    fillScreen(34, 30, u8"█");
-    //drawPixel(18, 5, 33, 31, u8"▄");
-    //setColor(18, 5, 33, 31);
-    getchar();
-    system(CLEAR);
-    return 0;
-}
 
 /*  Prototype of new implementation that fills the entire screen using
     a single buffer, same performance as filling one line at a time.
