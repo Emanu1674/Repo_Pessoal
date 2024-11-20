@@ -4,7 +4,6 @@
 #include <locale.h>
 
 #ifdef _WIN32
-#include <windows.h>
 #define CLEAR "cls"
 #else
 #define CLEAR "clear"
@@ -12,19 +11,6 @@
 
 #define LARGURA 80
 #define ALTURA 25
-
-
-// Essa função obrigatoriamente precisa de comentário pra ser entendida.
-//
-// A função recebe um ponteiro para char chamado "caractere" que contém o
-//    caractere que será usado para preencher a tela, exemplo "█".
-// É então definido um ponteiro para char com tamanho alocado = [LARGURA]
-//    (do terminal) * tamanho de caractere, chamado buffer.
-// Conteúdo de caractere é então copiado para dentro de buffer [LARGURA]
-//    vezes, criando um vetor de char que preenche uma linha inteira.
-// Esse vetor é impresso na tela [ALTURA] vezes, para encher o terminal
-//    linha por linha, ao invés de caractere por caractere (muito lento).
-//
 
 void preenche_Tela(int _FGColor, int _corFundo, char* _Char);
 void d_Retangulo(int _xPos1, int _yPos1, int _xPos2, int _yPos2, int _FGColor, int _corFundo, char* _Char);
