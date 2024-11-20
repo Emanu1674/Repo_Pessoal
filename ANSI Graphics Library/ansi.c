@@ -66,6 +66,10 @@ int main(){
     draw_Line(52, 24, 24, 0, 93, 34, u8"░");
 
     // Outras frescuras na tela
+    draw_Pixel(14, 8, 96, 34, u8"√");
+    draw_Pixel(14, 9, 96, 34, u8"√");
+    draw_Pixel(14, 10, 96, 34, u8"√");
+    draw_Pixel(14, 11, 96, 34, u8"»");
 
     getchar();
     system(CLEAR);
@@ -101,12 +105,15 @@ void draw_Filled_Rectangle(int x1, int y1, int x2, int y2, int color, int bgcolo
     int R_HEIGHT = abs(y2 - y1) + 1;
     char* buffer = malloc(R_WIDTH * strlen(block) + 1);
     //if (buffer == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
+    
     for(int i = 0 ; i < R_WIDTH ; i++)
         strncpy(buffer + i * strlen(block), block, strlen(block));
     buffer[R_WIDTH * strlen(block)] = '\0';
+
     printf("\033[%d;%dm", color, bgcolor + 10);
     for(int H = y1 ; H <= y2 ; H++)
         printf("\033[%d;%dH%s", H, x1, buffer);
+
     printf("\033[0m");
     free(buffer);
 }
@@ -114,11 +121,14 @@ void draw_Filled_Rectangle(int x1, int y1, int x2, int y2, int color, int bgcolo
 void fill_Screen(int color, int bgcolor, char* block){
     char* buffer = malloc(WIDTH * strlen(block));
     //if (buffer == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
+
     for(int i = 0 ; i < WIDTH ; i++)
         strncpy(buffer + i * strlen(block), block, strlen(block));
+
     printf("\033[%d;%dm", color, bgcolor + 10);
     for(int H = 1 ; H <= HEIGHT ; H++)
         printf("\033[%d;%dH%s", H, 1, buffer);
+
     printf("\033[0m");
     free(buffer);
 }
@@ -149,15 +159,13 @@ void draw_Pixel(int x, int y, int color, int bgcolor, char* block){
 static void bufferScreen(){
 }
 
-/*  Prototype of new implementation that fills the entire screen using
-    a single buffer, same performance as filling one line at a time.
-    Broken/Unused.
+/*  Protótipo de uma implementação que desenharia todo a tela de uma vez
+    usando só um buffer. A performance é a mesma da função que desenha
+    linha por linha, então abandonei essa função.
 
 void fillScreenFULL(int color, int bgcolor, const char *block){
     char* bufferX = malloc(WIDTH * strlen(block) + 1);
     char* bufferY = malloc(HEIGHT * strlen(bufferX));
-    //if (bufferX == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
-    //if (bufferY == NULL){ bugCheck(0x1A);}
     for(int i = 0 ; i < WIDTH ; i++)
         strncpy(bufferX + i * strlen(block), block, strlen(block));
     bufferX[WIDTH * strlen(block)] = '\0';
