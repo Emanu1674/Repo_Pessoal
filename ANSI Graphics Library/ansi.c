@@ -19,8 +19,8 @@
 // A função recebe um ponteiro para char chamado "block" que contém o
 //    caractere que será usado para preencher a tela, exemplo "█".
 // É então definido um ponteiro para char com tamanho alocado = [LARGURA]
-//    (do terminal) * tamanho de block, chamado bufferX.
-// Conteúdo de block é então copiado para dentro de bufferX [LARGURA]
+//    (do terminal) * tamanho de block, chamado buffer.
+// Conteúdo de block é então copiado para dentro de buffer [LARGURA]
 //    vezes, criando um vetor de char que preenche uma linha inteira.
 // Esse vetor é impresso na tela [ALTURA] vezes, para encher o terminal
 //    linha por linha, ao invés de caractere por caractere (muito lento).
@@ -81,7 +81,6 @@ void draw_Rectangle(int x1, int y1, int x2, int y2, int color, int bgcolor, char
     int R_HEIGHT = abs(y2 - y1) + 1;
 
     char* buffer = malloc(R_WIDTH * strlen(block) + 1);
-    //if (buffer == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
 
     for(int i = 0 ; i < R_WIDTH ; i++)
         strncpy(buffer + i * strlen(block), block, strlen(block));
@@ -90,8 +89,8 @@ void draw_Rectangle(int x1, int y1, int x2, int y2, int color, int bgcolor, char
     printf("\033[%d;%dm", color, bgcolor + 10);
     printf("\033[%d;%dH%s", y1, x1, buffer);
     for (int H = y1 + 1; H < y2; H++) {
-        printf("\033[%d;%dH%s", H, x1, block); // Left border
-        printf("\033[%d;%dH%s", H, x2, block); // Right border
+        printf("\033[%d;%dH%s", H, x1, block); // Borda esquerda
+        printf("\033[%d;%dH%s", H, x2, block); // Borda direita
     }
 
     printf("\033[%d;%dH%s", y2, x1, buffer);
@@ -104,8 +103,7 @@ void draw_Filled_Rectangle(int x1, int y1, int x2, int y2, int color, int bgcolo
     int R_WIDTH = abs(x2 - x1) + 1;
     int R_HEIGHT = abs(y2 - y1) + 1;
     char* buffer = malloc(R_WIDTH * strlen(block) + 1);
-    //if (buffer == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
-    
+
     for(int i = 0 ; i < R_WIDTH ; i++)
         strncpy(buffer + i * strlen(block), block, strlen(block));
     buffer[R_WIDTH * strlen(block)] = '\0';
@@ -180,7 +178,8 @@ void fillScreenFULL(int color, int bgcolor, const char *block){
     fflush(stdin);
 }*/
 
-/*  Old function, fills the screen one char at a time
+/*  Função velha, preenche a tela um caractere pro vez
+    Lenta pra caramba
 
 void fillScreen_OLD(int color, int bgcolor, const char *block){
     printf("\033[%d;%dm", color, bgcolor+10);
