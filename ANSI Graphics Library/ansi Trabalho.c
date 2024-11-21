@@ -56,7 +56,8 @@ void desenhaTabuleiro(jogo *partida){
 
 }
 
-void moverCursor(jogo *partida){
+int moverCursor(u8* rX, u8* rY, jogo *partida){
+    u8 tabuleiro[5][5];
     s8 Y = 0;
     s8 X = 0;
     u8 Cor = 0;
@@ -72,10 +73,10 @@ void moverCursor(jogo *partida){
 
         d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor+60, Cor+60, u8"█");
         tecla = getch();
-        if(tecla == 0 || tecla == 224) { // Arrow keys generate 2-part codes
+        if(tecla == 0 || tecla == 224) {
             tecla = getch();
             switch (tecla) {
-                case 72: 
+                case 72:
                     d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
                     Y -= 1;
                     if(Y < 0)
@@ -87,7 +88,7 @@ void moverCursor(jogo *partida){
                     if(Y > 4)
                         Y = 0;
                 break;
-                case 75: 
+                case 75:
                     d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
                     X -= 1;
                     if(X < 0)
@@ -99,10 +100,29 @@ void moverCursor(jogo *partida){
                     if(X > 4)
                         X = 0;    
                 break;
-                default: printf("Unknown special key\n"); continue;
+                default: continue;
             }
         }
     }
+    *rX = X;
+    *rY = Y;
+}
+
+void loopJogo(jogo *partida){
+    u8 X, Y;
+
+    // Desenha Menu
+    desenhaMenu();
+
+    // Desenha Tabuleiro
+    desenhaTabuleiro(partida);
+
+    printf("\033[3;27fJogador 1");
+    d_Linha(37, 3, 2, 0, 31, 31, u8"█");
+    printf("\033[0m");
+
+    // Loop de mover cursor
+    moverCursor(&X, &Y, partida);
 }
 
 int main(){
@@ -112,31 +132,17 @@ int main(){
     // Inicializa Struct
     jogo partida = {
         .tabuleiro = {
-            {1, 1, 0, 2, 2},
-            {0, 0, 0, 1, 2},
-            {1, 2, 0, 2, 1},
-            {2, 0, 1, 0, 0},
-            {2, 1, 1, 0, 1}
-        /*  {0, 0, 0, 0, 0},    Matriz Zerada / inicio de jogo
+            {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0}
-        */
         },
         .pecas = 0,
         .tempoJogo = 0
     };
-    //preenche_Tela(33, 33, u8"█");
 
-    // Desenha Menu
-    desenhaMenu();
-
-    // Desenha Tabuleiro
-    desenhaTabuleiro(&partida);
-
-    // Loop de mover cursor
-    moverCursor(&partida);
+    loopJogo(&partida);
 
     //getchar();
     system(CLEAR);
