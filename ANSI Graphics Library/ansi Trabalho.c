@@ -38,6 +38,7 @@ void MenuPrincipal();
 void desenhaMenuPrincipal();
 void desenhaHistorico();
 void desenhaMenu();
+void placePiece(jogo *partida, u8 jogador);
 
 void jogoLoop();
 int moverCursor(u8* _rX, u8* _rY, jogo *_partida);
@@ -62,13 +63,12 @@ void desenhaTabuleiro(jogo *partida){
                 d_Retangulo(COL + (i*6), LN + (j*3), COL+3 + (i*6), LN+1 + (j*3), 31, 30, "█");
         }
     }
-
 }
 
 int moverCursor(u8* rX, u8* rY, jogo *partida){
     u8 tabuleiro[5][5];
-    s8 Y = 0;
-    s8 X = 0;
+    s8 Y = 2;
+    s8 X = 2;
     u8 cor = 0;
     int tecla = 0;
     while(tecla != 13){     // 13 = Enter
@@ -117,8 +117,51 @@ int moverCursor(u8* rX, u8* rY, jogo *partida){
     *rY = Y;
 }
 
+void fase1(jogo *partida){
+    u8 pV, pA;
+    s8 X, Y;
+    pV = 1;
+    pA = 1;
+    //printf("\033[3;27fJogador 1");
+    //d_Linha(37, 3, 2, 0, 31, 31, "█");
+    printf("\033[6;52HPeças em");
+    printf("\033[7;54HJogo:");
+    d_Linha(52, 9, 2, 0, 31, 31, "█");
+    printf(" = 0");
+    d_Linha(52, 11, 2, 0, 34, 34, "█");
+    printf(" = 0");
+    printf("\033[0m");
+    for(u8 E = 0 ; E < 6 ; E++)
+        for(u8 J = 1 ; J < 3 ; J++)
+            for(u8 P = 0 ; P < 2 ; P){
+                printf("\033[3;19HJogador %d, adicione 2 peças", J);
+                moverCursor(&X, &Y, partida);
+                //printf("%d %d", X, Y);
+                if(X != 2 || Y != 2){
+                    if(J == 1 && partida->tabuleiro[Y][X] == 0){
+                        partida->tabuleiro[Y][X] = 2;
+                        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 31, 31, "█");
+                        d_Linha(52, 9, 2, 0, 31, 31, "█");
+                        printf(" = %d", pV);
+                        pV++;
+                        P++;
+                    }else if(J == 2 && partida->tabuleiro[Y][X] == 0)  {
+                        partida->tabuleiro[Y][X] = 1;
+                        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
+                        d_Linha(52, 11, 2, 0, 34, 34, "█");
+                        printf(" = %d", pA);
+                        pA++;
+                        P++;
+                    }
+                } else 
+                    printf("Peça proibida!");
+            }
+}
+
 void jogoLoop(){
-    u8 X, Y;
+    u8 pecasTotal = 24;
+    u8 pecasColocadas = 0;
+    u8 jogador = 1;
 
     // Inicializa Struct
     jogo partida = {
@@ -138,13 +181,7 @@ void jogoLoop(){
 
     // Desenha Tabuleiro
     desenhaTabuleiro(&partida);
-
-    printf("\033[3;27fJogador 1");
-    d_Linha(37, 3, 2, 0, 31, 31, "█");
-    printf("\033[0m");
-
-    // Loop de mover cursor
-    moverCursor(&X, &Y, &partida);
+    fase1(&partida);
 }
 
 void desenhaMenuPrincipal(){
@@ -298,7 +335,7 @@ void MenuPrincipal() {
     };
     const int numOpcoes = 5; // Número de itens no menu
     const int Ln = 14; // Linha de base para o texto do menu
-    const int Col = 35; // Coluna base para o texto do menu
+    const int Col = 36; // Coluna base para o texto do menu
     int posicao = 0; // Opção selecionada
 
     while (1){
@@ -361,7 +398,8 @@ int main(){
     printf("\033[?25l");
 
     // Desenha o menu principal do jogo
-    desenhaMenuPrincipal();
+    //desenhaMenuPrincipal();
+    jogoLoop();
 
     //getchar();
     system(CLEAR);
