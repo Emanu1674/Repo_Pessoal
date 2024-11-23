@@ -42,7 +42,7 @@ d_Retangulo_Preenchido(62, 1, 79, 2, 35, 35, u8"█");
 }
 
 void desenhaTabuleiro(jogo *partida){
-    d_Retangulo_Preenchido(16, 5, 47, 20, 96, 90, u8"░");
+    d_Retangulo_Preenchido(16, 5, 47, 20, 96, 30, u8"░");
     for(int i = 0 ; i <= 4 ; i++){
         for(int j = 0 ; j <= 4 ; j++){
             if(partida->tabuleiro[j][i] == 0)
@@ -60,42 +60,42 @@ int moverCursor(u8* rX, u8* rY, jogo *partida){
     u8 tabuleiro[5][5];
     s8 Y = 0;
     s8 X = 0;
-    u8 Cor = 0;
+    u8 cor = 0;
     int tecla = 0;
     while(tecla != 13){     // 13 = Enter
 
         if(partida->tabuleiro[Y][X] == 0)
-            Cor = 30;
+            cor = 30;
         else if(partida->tabuleiro[Y][X] == 1)
-            Cor = 34;
+            cor = 34;
         else if(partida->tabuleiro[Y][X] == 2)
-            Cor = 31;
+            cor = 31;
 
-        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor+60, Cor+60, u8"█");
+        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor+60, cor+60, u8"█");
         tecla = getch();
         if(tecla == 0 || tecla == 224) {
             tecla = getch();
             switch (tecla) {
                 case 72:
-                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
+                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor, cor, u8"█");
                     Y -= 1;
                     if(Y < 0)
                         Y = 4;
                 break;
                 case 80:
-                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
+                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor, cor, u8"█");
                     Y += 1;
                     if(Y > 4)
                         Y = 0;
                 break;
                 case 75:
-                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
+                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor, cor, u8"█");
                     X -= 1;
                     if(X < 0)
                         X = 4;
                 break;
                 case 77:
-                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, Cor, Cor, u8"█");
+                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor, cor, u8"█");
                     X += 1;
                     if(X > 4)
                         X = 0;    
@@ -108,26 +108,8 @@ int moverCursor(u8* rX, u8* rY, jogo *partida){
     *rY = Y;
 }
 
-void loopJogo(jogo *partida){
+void jogoLoop(){
     u8 X, Y;
-
-    // Desenha Menu
-    desenhaMenu();
-
-    // Desenha Tabuleiro
-    desenhaTabuleiro(partida);
-
-    printf("\033[3;27fJogador 1");
-    d_Linha(37, 3, 2, 0, 31, 31, u8"█");
-    printf("\033[0m");
-
-    // Loop de mover cursor
-    moverCursor(&X, &Y, partida);
-}
-
-int main(){
-    setlocale(LC_ALL, "en_us.UTF-8");
-    printf("\033[?25l");
 
     // Inicializa Struct
     jogo partida = {
@@ -142,7 +124,89 @@ int main(){
         .tempoJogo = 0
     };
 
-    loopJogo(&partida);
+    // Desenha o Menu da partida
+    desenhaMenu();
+
+    // Desenha Tabuleiro
+    desenhaTabuleiro(&partida);
+
+    printf("\033[3;27fJogador 1");
+    d_Linha(37, 3, 2, 0, 31, 31, u8"█");
+    printf("\033[0m");
+
+    // Loop de mover cursor
+    moverCursor(&X, &Y, &partida);
+}
+
+void desenhaMenuPrincipal(){
+    int cor = 0;
+    int x = 22;
+
+    // Desenha borda da tela
+    d_Linha(1, 1, 80, 0, 96, 30, u8"░");
+    d_Linha(1, 25, 80, 0, 96, 30, u8"░");
+    d_Retangulo_Preenchido(1, 2, 2, 25, 96, 30, u8"░");
+    d_Retangulo_Preenchido(79, 2, 80, 25, 96, 30, u8"░");
+    
+    // Desenhos em volta da logo
+    for(int i = 0 ; i < 5 ; i++){  
+        cor = i % 2 == 0 ? 34 : 31;
+        d_Linha(x + (i*8), 3, 6, 0, cor, 39, "▄");
+    }
+    for(int i = 0 ; i < 5 ; i++){  
+        cor = i % 2 == 0 ? 31 : 34;
+        d_Linha(x + (i*8), 10, 6, 0, cor, 39, "▄");
+    }
+
+    d_Linha(4, 6, 8, 0, 31, 39, "░");
+    d_Linha(12, 6, 8, 0, 32, 39, "░");
+    d_Linha(4, 8, 8, 0, 35, 39, "░");
+    d_Linha(12, 8, 8, 0, 93, 39, "░");
+
+    // Logo SEEGA
+    for(int i = 0 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 5, 6, 0, 97, 39, "█");
+    for(int i = 0 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 6, 2, 0, 97, 39, "█");
+        d_Linha(58, 6, 2, 0, 97, 39, "█");
+    for(int i = 1 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 7, 4, 0, 97, 39, "█");
+        d_Linha(22, 7, 6, 0, 97, 39, "█");
+        d_Linha(50, 7, 2, 0, 97, 39, "█");
+        d_Linha(58, 7, 2, 0, 97, 39, "█");
+
+    for(int i = 1 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 8, 6, 0, 97, 39, "█");
+        d_Linha(26, 8, 2, 0, 97, 39, "█");
+
+    for(int i = 0 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 9, 6, 0, 97, 39, "█");
+
+    // Logo SEEGA Sombra
+    x = 23;
+    for(int i = 0 ; i < 5 ; i++)
+        d_Linha(x + (i*8), 4, 6, 0, 90, 39, "▄");
+
+
+    getchar();
+    system(CLEAR);
+}
+
+// Função Main, serve apenas para configurar o terminal e
+// chamar as funções que iniciam o jogo de fato
+
+int main(){
+    setlocale(LC_ALL, "pt_br.UTF-8");
+    printf("\033[?25l");
+
+    int tecla = 0;
+    
+
+    // Desenha o menu principal do jogo
+    desenhaMenuPrincipal(&tecla);
+
+
+    //jogoLoop();
 
     //getchar();
     system(CLEAR);
