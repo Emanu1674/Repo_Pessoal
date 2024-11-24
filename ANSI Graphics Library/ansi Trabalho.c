@@ -239,8 +239,10 @@ void fase1CPU(jogo* partida){
                     if(E == 5){
                         for(int i = 0 ; i < 5 ; i++){
                             for(int j = 0 ; j < 5 ; j++){
-                                if(partida->tabuleiro[j][i] == 0){
-                                    partida->tabuleiro[j][i] = 2;
+                                if(partida->tabuleiro[j][i] == 0 && (j != 2 && i != 2)){
+                                    X = i;
+                                    Y = j;
+                                    goto teste;
                                 }
                                 //break;
                             }
@@ -249,6 +251,7 @@ void fase1CPU(jogo* partida){
                     }
                         if(X != 2 || Y != 2){
                             if(partida->tabuleiro[Y][X] == 0){
+                                teste:
                                 partida->tabuleiro[Y][X] = 1;
                                 d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
                                 d_Linha(52, 11, 2, 0, 34, 34, "█");
@@ -261,6 +264,7 @@ void fase1CPU(jogo* partida){
                         }   
                 }
             }
+            getchar();
 }
 
 void jogoLoop(u8 modo){
