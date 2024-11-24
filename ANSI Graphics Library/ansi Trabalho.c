@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
+#include <stdbool.h>
 #include <locale.h>
 
 #ifdef _WIN32
@@ -34,14 +35,13 @@ void d_Retangulo_Preenchido(int _xPos1, int _yPos1, int _xPos2, int _yPos2, int 
 void d_Linha(int _xPos, int _yPos, int _xSize, int _ySize, int _FGColor, int _corFundo, char* _Char);
 void d_Pixel(int _xPos, int _yPos, int _FGColor, int _corFundo, char* _Char);
 
-void desenhaTabuleiro(jogo *_partida);
-void MenuPrincipal();
-void menuNovoJogo();
 void desenhaMenuPrincipal();
 void desenhaHistorico();
 void desenhaMenu();
-void placePiece(jogo *partida, u8 jogador);
+void desenhaTabuleiro(jogo *_partida);
 
+void MenuPrincipal();
+void menuNovoJogo();
 void jogoLoop(u8 modo);
 int moverCursor(u8* _rX, u8* _rY, jogo *_partida);
 
@@ -75,11 +75,11 @@ int moverCursor(u8* rX, u8* rY, jogo *partida){
     int tecla = 0;
     while(tecla != 13){     // 13 = Enter
 
-        if(partida->tabuleiro[Y][X] == 0)
+        if(partida->tabuleiro[X][Y] == 0)
             cor = 30;
-        else if(partida->tabuleiro[Y][X] == 1)
+        else if(partida->tabuleiro[X][Y] == 2)
             cor = 34;
-        else if(partida->tabuleiro[Y][X] == 2)
+        else if(partida->tabuleiro[X][Y] == 1)
             cor = 31;
 
         d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, cor+60, cor+60, "█");
@@ -164,15 +164,15 @@ void fase1(jogo* partida){
                 moverCursor(&X, &Y, partida);
                 //printf("%d %d", X, Y);
                 if(X != 2 || Y != 2){
-                    if(J == 1 && partida->tabuleiro[Y][X] == 0){
-                        partida->tabuleiro[Y][X] = 2;
+                    if(J == 1 && partida->tabuleiro[X][Y] == 0){
+                        partida->tabuleiro[X][Y] = 1;
                         d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 31, 31, "█");
                         d_Linha(52, 9, 2, 0, 31, 31, "█");
                         printf(" = %d", pV);
                         pV++;
                         P++;
-                    }else if(J == 2 && partida->tabuleiro[Y][X] == 0)  {
-                        partida->tabuleiro[Y][X] = 1;
+                    }else if(J == 2 && partida->tabuleiro[X][Y] == 0)  {
+                        partida->tabuleiro[X][Y] = 2;
                         d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
                         d_Linha(52, 11, 2, 0, 34, 34, "█");
                         printf(" = %d", pA);
@@ -209,8 +209,8 @@ void fase1CPU(jogo* partida){
                 if(J == 1){
                     moverCursor(&X, &Y, partida);
                     if(X != 2 || Y != 2){
-                        if(partida->tabuleiro[Y][X] == 0){
-                            partida->tabuleiro[Y][X] = 2;
+                        if(partida->tabuleiro[X][Y] == 0){
+                            partida->tabuleiro[X][Y] = 1;
                             d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 31, 31, "█");
                             d_Linha(52, 9, 2, 0, 31, 31, "█");
                             printf(" = %d", pV);
@@ -239,20 +239,20 @@ void fase1CPU(jogo* partida){
                     if(E == 5){
                         for(int i = 0 ; i < 5 ; i++){
                             for(int j = 0 ; j < 5 ; j++){
-                                if(partida->tabuleiro[j][i] == 0 && (j != 2 && i != 2)){
+                                if(partida->tabuleiro[i][j] == 0 && (i != 2 && j != 2)){
                                     X = i;
                                     Y = j;
-                                    goto teste;
+                                    break;  // Aqui tinha o Goto antes
                                 }
-                                //break;
                             }
-                            //break;
+                            if (X != 2 || Y != 2)
+                                break;
                         }
                     }
                         if(X != 2 || Y != 2){
-                            if(partida->tabuleiro[Y][X] == 0){
-                                teste:
-                                partida->tabuleiro[Y][X] = 1;
+                            if(partida->tabuleiro[X][Y] == 0){
+                                //Goto pulava pra cá antes
+                                partida->tabuleiro[X][Y] = 2;
                                 d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
                                 d_Linha(52, 11, 2, 0, 34, 34, "█");
                                 printf(" = %d", pA);
