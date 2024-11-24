@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <conio.h>
 #include <stdbool.h>
+#include <conio.h>
+#include <string.h>
 #include <locale.h>
+#include <time.h>
 
 #ifdef _WIN32
 #define CLEAR "cls"
@@ -16,16 +17,14 @@
 #define COL 18
 #define LN 6
 
-typedef unsigned char u8;
-typedef signed char s8;
 typedef struct{
-    u8 hora, min, seg;
+    int hora, min, seg;
 } horario;
 
 typedef struct{
     int tabuleiro[5][5];
     short pecas;
-    u8 jogador;
+    int jogador;
     long tempoJogo;
 } jogo;
 
@@ -42,8 +41,9 @@ void desenhaTabuleiro(jogo *_partida);
 
 void MenuPrincipal();
 void menuNovoJogo();
-void jogoLoop(u8 modo);
-int moverCursor(u8* _rX, u8* _rY, jogo *_partida);
+void jogoLoop(int modo);
+int moverCursor(int* _rX, int* _rY, jogo *_partida);
+bool posicao_Valida(int X, int Y, jogo* partida);
 
 void desenhaMenu(){
 d_Retangulo_Preenchido(62, 1, 79, 2, 35, 35, "█");
@@ -67,11 +67,11 @@ void desenhaTabuleiro(jogo *partida){
     }
 }
 
-int moverCursor(u8* rX, u8* rY, jogo *partida){
-    u8 tabuleiro[5][5];
-    s8 Y = 2;
-    s8 X = 2;
-    u8 cor = 0;
+int moverCursor(int* rX, int* rY, jogo *partida){
+    int tabuleiro[5][5];
+    int Y = 2;
+    int X = 2;
+    int cor = 0;
     int tecla = 0;
     while(tecla != 13){     // 13 = Enter
 
@@ -119,20 +119,34 @@ int moverCursor(u8* rX, u8* rY, jogo *partida){
     *rY = Y;
 }
 
-void CPUCriaPeca(u8* pX, u8* pY, jogo* partida){
-    s8 X = *pX;
-    s8 Y = *pY;
-    
-    X += 1;
-    Y += 2;
+void CPUCriaPeca(int* pX, int* pY, jogo* partida) {
+    int X, Y;
+    int attempts = 0;  // Total de tentativas feitas
+    const int maxAttempts = 25;  // Máximo de tentativas falhas
 
-    X = X > 4 ? 0 : X;
-    Y = Y > 4 ? 0 : Y;
-    X = X < 0 ? 4 : X;
-    Y = Y < 0 ? 4 : Y;
+    // Seleção aleatória com fallback em caso de loop infinito
+    while (attempts < maxAttempts) {
+        X = (rand() % 5);  // Coordenada X Aleatória (0-4)
+        Y = (rand() % 5);  // Coordenada Y Aleatória (0-4)
 
-    *pX = X;
-    *pY = Y;
+        if (partida->tabuleiro[X][Y] == 0 && !(X == 2 && Y == 2)) {
+            *pX = X;
+            *pY = Y;
+            return;  // Posição válida encontrada
+        }
+        attempts++;
+    }
+
+    // Pesquisa de força bruta caso a função fique presa
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (partida->tabuleiro[i][j] == 0) {
+                *pX = i;
+                *pY = j;
+                return;  // Posição válida encontrada
+            }
+        }
+    }
 }
 
 void fase2(jogo* partida){
@@ -143,13 +157,10 @@ void fase2(jogo* partida){
     getchar();
 }
 
-void fase1(jogo* partida){
-    u8 pV, pA;
-    s8 X, Y;
-    pV = 1;
-    pA = 1;
-    //printf("\033[3;27fJogador 1");
-    //d_Linha(37, 3, 2, 0, 31, 31, "█");
+void fase1(jogo* partida) {
+    int pecasJogador1 = 1, pecasJogador2 = 1;
+    int X, Y;
+    
     printf("\033[6;52HPeças em");
     printf("\033[7;54HJogo:");
     d_Linha(52, 9, 2, 0, 31, 31, "█");
@@ -157,43 +168,46 @@ void fase1(jogo* partida){
     d_Linha(52, 11, 2, 0, 34, 34, "█");
     printf(" = 0");
     printf("\033[0m");
-    for(u8 E = 0 ; E < 6 ; E++)
-        for(u8 J = 1 ; J < 3 ; J++)
-            for(u8 P = 0 ; P < 2 ; P){
-                printf("\033[3;19HJogador %d, adicione 2 peças", J);
+
+    for (int etapa = 0; etapa < 6; etapa++) {
+        for (int jogador = 1; jogador < 3; jogador++) {
+            for (int peca = 0; peca < 3; peca++) {
+                printf("\033[3;19HJogador %d, adicione 2 peças", jogador);
                 moverCursor(&X, &Y, partida);
-                //printf("%d %d", X, Y);
-                if(X != 2 || Y != 2){
-                    if(J == 1 && partida->tabuleiro[X][Y] == 0){
-                        partida->tabuleiro[X][Y] = 1;
-                        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 31, 31, "█");
-                        d_Linha(52, 9, 2, 0, 31, 31, "█");
-                        printf(" = %d", pV);
-                        pV++;
-                        P++;
-                    }else if(J == 2 && partida->tabuleiro[X][Y] == 0)  {
-                        partida->tabuleiro[X][Y] = 2;
-                        d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
-                        d_Linha(52, 11, 2, 0, 34, 34, "█");
-                        printf(" = %d", pA);
-                        pA++;
-                        P++;
-                    }
-                } else 
+                
+                if (X == 2 && Y == 2) {  // Centro é proibido
                     printf("\033[25;24HPeça proibida!");
+                    continue;
+                }
+
+                if (partida->tabuleiro[X][Y] == 0) {  // Se Posição vazia
+                    // Atualizar tabuleiro
+                    partida->tabuleiro[X][Y] = jogador;  // Jogador 1 ou 2
+                    int cor = (jogador == 1) ? 31 : 34;  // Cor para jogador 1 ou 2
+                    d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL + 3 + X*6, LN + 1 + Y*3, cor, cor, "█");
+
+                    // Atualizar contagem de peças
+                    if (jogador == 1) {
+                        d_Linha(52, 9, 2, 0, 31, 31, "█");
+                        printf(" = %d", pecasJogador1++);
+                    } else {
+                        d_Linha(52, 11, 2, 0, 34, 34, "█");
+                        printf(" = %d", pecasJogador2++);
+                    }
+                    peca++;
+                }
             }
+        }
+    }
     fase2(partida);
 }
 
-void fase1CPU(jogo* partida){
-    u8 pV, pA;
-    s8 X, Y;
-    u8 contX = 0;
-    u8 contY = 0;
-    pV = 1;
-    pA = 1;
-    //printf("\033[3;27fJogador 1");
-    //d_Linha(37, 3, 2, 0, 31, 31, "█");
+void fase1CPU(jogo* partida) {
+    int X, Y; // Variáveis de posição
+    int jogador = 1; // Jogador 1 começa
+    int pecasPorJogador = 12; // Cada jogador começa com 12 peças
+    int pecasJogador1 = 0, pecasComputador = 0; // Contador de peças jogadas
+
     printf("\033[6;52HPeças em");
     printf("\033[7;54HJogo:");
     d_Linha(52, 9, 2, 0, 31, 31, "█");
@@ -201,76 +215,55 @@ void fase1CPU(jogo* partida){
     d_Linha(52, 11, 2, 0, 34, 34, "█");
     printf(" = 0");
     printf("\033[0m");
-    for(u8 E = 0 ; E < 6 ; E++)
-        for(u8 J = 1 ; J < 3 ; J++)
-            for(u8 P = 0 ; P < 2 ; P){
-                printf("\033[3;19HJogador %d, adicione 2 peças", J);
-                //printf("%d %d", X, Y);
-                if(J == 1){
-                    moverCursor(&X, &Y, partida);
-                    if(X != 2 || Y != 2){
-                        if(partida->tabuleiro[X][Y] == 0){
-                            partida->tabuleiro[X][Y] = 1;
-                            d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 31, 31, "█");
-                            d_Linha(52, 9, 2, 0, 31, 31, "█");
-                            printf(" = %d", pV);
-                            pV++;
-                            P++;
-                        }
-                        printf("\033[25;24HPeça proibida!");
+
+    while (pecasJogador1 < pecasPorJogador || pecasComputador < pecasPorJogador) {
+        for (int turn = 0; turn < 2; turn++) { // Cada jogador tem dois turnos por round
+            if (jogador == 1) { // Turno do Jogador 1
+                bool movimento_Valido = false;
+                while (!movimento_Valido) {
+                    moverCursor(&X, &Y, partida); // Entrada de input do Jogador
+                    if (posicao_Valida(X, Y, partida)) { // Verifica se posição é válida
+                        partida->tabuleiro[X][Y] = 1; // Atualiza o tabuleiro
+                        d_Retangulo_Preenchido(COL + X * 6, LN + Y * 3, COL + 3 + X * 6, LN + 1 + Y * 3, 31, 31, "█"); // Desenha quadrado vermelho
+                        d_Linha(52, 9, 2, 0, 31, 31, "█");
+                        printf(" = %d", pecasJogador1+1);
+                        pecasJogador1++;
+                        movimento_Valido = true;
+                    } else {
+                        printf("\033[25;24HMovimento Inválido!.");
                     }
-                }else{
-                    CPUCriaPeca(&X, &Y, partida);
-                    contX++;
-                    contY++;
-                    if(contX > 5){
-                        X++;
-                        X = X > 4 ? 0 : X;
-                        X = X < 0 ? 4 : X;
-                        contX = 0;
+                }
+            } else { // Vez da CPU
+                bool movimento_Valido = false;
+                while (!movimento_Valido) {
+                    CPUCriaPeca(&X, &Y, partida); // CPU seleciona posição
+                    if (posicao_Valida(X, Y, partida)) { // Valida a escolha da CPU
+                        partida->tabuleiro[X][Y] = 2; // Atualiza o tabuleiro
+                        d_Retangulo_Preenchido(COL + X * 6, LN + Y * 3, COL + 3 + X * 6, LN + 1 + Y * 3, 34, 34, "█"); // Desenha quadrado azul
+                        d_Linha(52, 11, 2, 0, 34, 34, "█");
+                        printf(" = %d", pecasComputador+1);
+                        pecasComputador++;
+                        movimento_Valido = true;
                     }
-                    if(contY > 5){
-                        Y--;
-                        Y = Y > 4 ? 0 : X;
-                        Y = Y < 0 ? 4 : Y;
-                        contY = 0;
-                    }
-                    printf("   %d %d", X, Y);
-                    if(E == 5){
-                        for(int i = 0 ; i < 5 ; i++){
-                            for(int j = 0 ; j < 5 ; j++){
-                                if(partida->tabuleiro[i][j] == 0 && (i != 2 && j != 2)){
-                                    X = i;
-                                    Y = j;
-                                    break;  // Aqui tinha o Goto antes
-                                }
-                            }
-                            if (X != 2 || Y != 2)
-                                break;
-                        }
-                    }
-                        if(X != 2 || Y != 2){
-                            if(partida->tabuleiro[X][Y] == 0){
-                                //Goto pulava pra cá antes
-                                partida->tabuleiro[X][Y] = 2;
-                                d_Retangulo_Preenchido(COL + X*6, LN + Y*3, COL+3 + X*6, LN+1 + Y*3, 34, 34, "█");
-                                d_Linha(52, 11, 2, 0, 34, 34, "█");
-                                printf(" = %d", pA);
-                                contX = 0;
-                                contY = 0;
-                                pA++;
-                                P++;
-                            }
-                        }   
                 }
             }
-            getchar();
+        }
+        // Alterna entre Jogador 1 e CPU
+        jogador = (jogador == 1) ? 2 : 1;
+    }
+
+    printf("\033[10;10HBoard setup complete. Starting the next phase...");
+    getchar();
 }
 
-void jogoLoop(u8 modo){
-    u8 pecasTotal = 24;
-    u8 pecasColocadas = 0;
-    u8 jogador = 1;
+bool posicao_Valida(int X, int Y, jogo* partida) {
+    return X >= 0 && X < 5 && Y >= 0 && Y < 5 && partida->tabuleiro[X][Y] == 0 && !(X == 2 && Y == 2);
+}
+
+void jogoLoop(int modo){
+    int pecasTotal = 24;
+    int pecasColocadas = 0;
+    int jogador = 1;
 
     // Inicializa Struct
     jogo partida = {
@@ -299,8 +292,8 @@ void jogoLoop(u8 modo){
 }
 
 void desenhaMenuPrincipal(){
-    u8 cor = 0;
-    u8 x = 22;
+    int cor = 0;
+    int x = 22;
 
     printf("\033[0m");
     // Desenha borda da tela
@@ -436,10 +429,11 @@ void desenhaHistorico(){
     system(CLEAR);
     fflush(stdin);
     desenhaMenuPrincipal();
+    MenuPrincipal();
 }
 
 void MenuPrincipal() {
-    const char *opcoes[] = {
+    const char* opcoes[] = {
         "Novo Jogo", 
         "Carregar Jogo", 
         "Histórico", 
@@ -466,9 +460,9 @@ void MenuPrincipal() {
 
 
         // Entrada do teclado
-        u8 tecla = getch();
+        int tecla = getch();
         if (tecla == 224) { // O código das setas vem depois de 224
-            u8 seta = getch();
+            int seta = getch();
             if (seta == 72){
                 // Seta pra cima
                 posicao = (posicao - 1 + numOpcoes) % numOpcoes; // Loopa o menu
@@ -530,9 +524,9 @@ void menuNovoJogo(){
 
 
         // Entrada do teclado
-        u8 tecla = getch();
+        int tecla = getch();
         if (tecla == 224) { // O código das setas vem depois de 224
-            u8 seta = getch();
+            int seta = getch();
             if (seta == 72){
                 // Seta pra cima
                 posicao = (posicao - 1 + numOpcoes) % numOpcoes; // Loopa o menu
@@ -565,6 +559,7 @@ void menuNovoJogo(){
 // chamar as funções que iniciam o jogo de fato
 
 int main(){
+    srand(time(NULL));
     setlocale(LC_ALL, "pt_br.UTF-8");
     printf("\033[?25l");
 
@@ -619,7 +614,6 @@ void d_Retangulo_Preenchido(int x1, int y1, int x2, int y2, int cor, int corFund
 
 void d_preenche_Tela(int cor, int corFundo, char* caractere){
     char* buffer = malloc(LARGURA * strlen(caractere));
-    //if (buffer == NULL){ bugCheck(0x1A);}     // 0x1A = OUT_OF_MEMORY
 
     for(int i = 0 ; i < LARGURA ; i++)
         strncpy(buffer + i * strlen(caractere), caractere, strlen(caractere));
