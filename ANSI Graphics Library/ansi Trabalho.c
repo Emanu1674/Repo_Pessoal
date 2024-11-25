@@ -12,12 +12,12 @@
 #define CLEAR "clear"
 #endif
 
-#define LARGURA 80
+#define LARGURA 90
 #define ALTURA 25
 #define COR_JGDR_1 31
 #define COR_JGDR_2 34
-#define COL 18
 #define LN 6
+#define COL 26
 
 typedef struct{
     int hora, min, seg;
@@ -46,56 +46,126 @@ void desenhaTabuleiro(jogo *_partida);
 void menuPrincipal();
 void menuNovoJogo();
 void jogoLoop(int _modo);
-int entradaTeclado(int* _rY, int* _rX, jogo *_partida);
+//void avaliacao(int* _Y, int* _X, jogo* partida);
+int entradaTeclado(int* _rY, int* _rX, jogo* _partida);
 bool posicao_Valida(int _Y, int _X, jogo* _partida);
 
 void desenhaMenuLateral(){
-d_Retangulo_Preenchido(1, 64, 2, 79, 35, 35, "█");
-    d_Retangulo_Preenchido(3, 64, 24, 79, 94, 94, "█");
-    d_Linha(1, 80, 2, 0, 35, 30, "░");
-    d_Linha(25, 64, 0, 17, 94, 34, "░");
-    d_Linha(3, 80, 22, 0, 94, 34, "░");
-    d_Linha(25, 1, 0, 63, 90, 39, "░");
-    d_Linha(25, 21, 0, 22, 96, 39, "█");
+d_Retangulo_Preenchido(1, 74, 2, 89, 35, 35, "█");
+    d_Retangulo_Preenchido(3, 74, 24, 89, 94, 94, "█");
+    d_Linha(1, 90, 2, 0, 35, 30, "░");
+    d_Linha(25, 74, 0, 17, 94, 34, "░");
+    d_Linha(3, 90, 22, 0, 94, 34, "░");
+    d_Linha(25, 1, 0, 73, 90, 39, "░");
+    d_Linha(25, 31, 0, 22, 96, 39, "█");
 
-    printf("\033[4;65H\033[30;104mN\033[97;104movo Jogo");
-    printf("\033[5;65H\033[30;104mS\033[97;104malvar Jogo");
-    printf("\033[6;65H\033[30;104mC\033[97;104marregar Jogo");
-    printf("\033[7;65H\033[30;104mP\033[97;104mausar Jogo");
-    printf("\033[8;65H\033[30;104mA\033[97;104mjuda");
-    printf("\033[10;65HVoltar ao \033[30;104mM\033[97;104menu");
-    d_Linha(11, 65, 0, 14, 97, 94, "─");
-    printf("\033[12;65H\033[97;104mMostrar");
-    printf("\033[13;65H\033[30;104mJ\033[97;104mogadas");
+    printf("\033[4;75H\033[30;104mN\033[97;104movo Jogo");
+    printf("\033[5;75H\033[30;104mS\033[97;104malvar Jogo");
+    printf("\033[6;75H\033[30;104mC\033[97;104marregar Jogo");
+    printf("\033[7;75H\033[30;104mP\033[97;104mausar Jogo");
+    printf("\033[8;75H\033[30;104mA\033[97;104mjuda");
+    printf("\033[10;75HVoltar ao \033[30;104mM\033[97;104menu");
+    d_Linha(11, 75, 0, 14, 97, 94, "─");
+    printf("\033[12;75H\033[97;104mMostrar");
+    printf("\033[13;75H\033[30;104mJ\033[97;104mogadas");
 
     printf("\033[0m");
 }
 
-void desenhaTabuleiro(jogo *partida){
-    d_Pixel(6, 15, 97, 39, "A");
-    d_Pixel(9, 15, 97, 39, "B");
-    d_Pixel(12, 15, 97, 39, "C"); 
-    d_Pixel(15, 15, 97, 39, "D");
-    d_Pixel(18, 15, 97, 39, "E");
-    d_Retangulo_Preenchido(5, 16, 20, 47, 96, 30, "░");
+void desenhaTabuleiro(jogo* partida){
+    d_Pixel(7, 25, 97, 39, "A");
+    d_Pixel(10, 25, 97, 39, "B");
+    d_Pixel(13, 25, 97, 39, "C"); 
+    d_Pixel(16, 25, 97, 39, "D");
+    d_Pixel(19, 25, 97, 39, "E");
+    d_Retangulo_Preenchido(6, 26, 21, 57, 96, 30, "░");
     for(int i = 0 ; i <= 4 ; i++){
         for(int j = 0 ; j <= 4 ; j++){
             if(partida->tabuleiro[i][j] == 0)
-                d_Retangulo(LN + (i*3), COL + (j*6), LN+1 + (i*3), COL+3 + (j*6), 30, 30, "█");
+                d_Retangulo(LN+1 + (i*3), COL+2 + (j*6), LN+2 + (i*3), COL+5 + (j*6), 30, 30, "█");
             else if(partida->tabuleiro[i][j] == 1)
-                d_Retangulo(LN + (i*3), COL + (j*6), LN+1 + (i*3), COL+3 + (j*6), COR_JGDR_1, 30, "█");
+                d_Retangulo(LN+1 + (i*3), COL+2 + (j*6), LN+2 + (i*3), COL+5 + (j*6), COR_JGDR_1, 30, "█");
             else if(partida->tabuleiro[i][j] == 2)
-                d_Retangulo(LN + (i*3), COL + (j*6), LN+1 + (i*3), COL+3 + (j*6), COR_JGDR_2, 30, "█");
+                d_Retangulo(LN+1 + (i*3), COL+2 + (j*6), LN+2 + (i*3), COL+5 + (j*6), COR_JGDR_2, 30, "█");
         }
     }
-    d_Pixel(4, 19, 97, 39, "1");
-    d_Pixel(4, 25, 97, 39, "2");
-    d_Pixel(4, 31, 97, 39, "3");
-    d_Pixel(4, 37, 97, 39, "4");
-    d_Pixel(4, 43, 97, 39, "5");
+    d_Pixel(5, 29, 97, 39, "1");
+    d_Pixel(5, 35, 97, 39, "2");
+    d_Pixel(5, 41, 97, 39, "3");
+    d_Pixel(5, 47, 97, 39, "4");
+    d_Pixel(5, 53, 97, 39, "5");
 }
 
-int entradaTeclado(int* rY, int* rX, jogo *partida){
+int selecionaPeca(int* rY, int* rX, jogo* partida){
+    int tabuleiro[5][5];
+    int Y = *rY;
+    int X = *rX;
+    int cor = 0;
+    int tecla = 0;
+
+    while(tecla != 13){
+        if(partida->tabuleiro[Y][X] == 0)
+            cor = 30;
+        else if(partida->tabuleiro[Y][X] == 2)
+            cor = COR_JGDR_2;
+        else if(partida->tabuleiro[Y][X] == 1)
+            cor = COR_JGDR_1;
+        else if(partida->tabuleiro[Y][X] == 3)
+            cor = 33;
+        else if(partida->tabuleiro[Y][X] == 4)
+            cor = 32;
+
+        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor+60, cor+60, "█");
+
+        tecla = getch();        // Código de tecla especial
+        if(tecla == 0 || tecla == 224) {
+            tecla = getch();    // Código das teclas de setas
+            switch (tecla) {
+                case 72:    // Cima
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    Y -= 1;
+                    if(Y < 0)
+                        Y = 4;
+                    //getch();
+                    //avaliacao(&Y, &X, partida);
+                    break;
+                case 80:    // Baixo
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    Y += 1;
+                    if(Y > 4)
+                        Y = 0;
+                    //getch();
+                    //avaliacao(&Y, &X, partida);
+                    break;
+                case 75:    // Esquerda
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    X -= 1;
+                    if(X < 0)
+                        X = 4;
+                    //getch();
+                    //avaliacao(&Y, &X, partida);
+                    break;
+                case 77:    // Direita
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    X += 1;
+                    if(X > 4)
+                        X = 0;    
+                    //getch();
+                    //avaliacao(&Y, &X, partida);
+                    break;
+                default:
+                    continue;
+            }
+        }
+    }
+    
+    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+
+    *rY = Y;
+    *rX = X;
+}
+
+int entradaTeclado(int* rY, int* rX, jogo* partida){
     int tabuleiro[5][5];
     int Y = *rY;
     int X = *rX;
@@ -110,32 +180,32 @@ int entradaTeclado(int* rY, int* rX, jogo *partida){
         else if(partida->tabuleiro[Y][X] == 1)
             cor = COR_JGDR_1;
 
-        d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN+1 + Y*3, COL+3 + X*6, cor+60, cor+60, "█");
+        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor+60, cor+60, "█");
 
         tecla = getch();        // Código de tecla especial
         if(tecla == 0 || tecla == 224) {
             tecla = getch();    // Código das teclas de setas
             switch (tecla) {
                 case 72:    // Cima
-                    d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN+1 + Y*3, COL+3 + X*6, cor, cor, "█");
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
                     Y -= 1;
                     if(Y < 0)
                         Y = 4;
                     break;
                 case 80:    // Baixo
-                    d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN+1 + Y*3, COL+3 + X*6, cor, cor, "█");
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
                     Y += 1;
                     if(Y > 4)
                         Y = 0;
                     break;
                 case 75:    // Esquerda
-                    d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN+1 + Y*3, COL+3 + X*6, cor, cor, "█");
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
                     X -= 1;
                     if(X < 0)
                         X = 4;
                     break;
                 case 77:    // Direita
-                    d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN+1 + Y*3, COL+3 + X*6, cor, cor, "█");
+                    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
                     X += 1;
                     if(X > 4)
                         X = 0;    
@@ -181,7 +251,7 @@ int entradaTeclado(int* rY, int* rX, jogo *partida){
         }
     }
 
-    d_Retangulo_Preenchido(LN + Y * 3, COL + X * 6, LN + 1 + Y * 3, COL + 3 + X * 6, cor, cor, "█");
+    d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
 
     *rY = Y;
     *rX = X;
@@ -217,73 +287,113 @@ void CPUCriaPeca(int* pY, int* pX, jogo* partida) {
     }
 }
 
+/*
+void avaliacao(int* Y, int* X, jogo* partida){
+    if(partida->tabuleiro[*Y-1][*X] == 0){
+        d_Retangulo_Preenchido();
+    }
+}
+*/
+
 void fase2(jogo* partida){
+    int Y = 0, X = 0;
+    int SY = 0, SX = 0;
     desenhaTabuleiro(partida);
-    d_Linha(3, 1, 0, 63, 97, 39, " ");
-    printf("\033[1;65H\033[97;45mJogando:");
-    printf("\033[2;65H\033[97;45mJogador %d", partida->jogador);
+    d_Linha(3, 1, 0, 73, 97, 39, " ");
+    printf("\033[1;75H\033[97;45mJogando:");
+    printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
     printf("\033[h\033[0m");
+    while(1){
+        selecionaPeca(&Y, &X, partida);
+        d_Linha(25, 31, 0, 22, 96, 39, "█");
+        if(partida->jogador != partida->tabuleiro[Y][X] || partida->tabuleiro[Y][X] == 0){
+            d_Linha(25, 31, 0, 22, 96, 39, "█");
+            printf("\033[25;32H\033[31;106mSeleção Inválida!\033[0m");
+        } else {
+            partida->tabuleiro[Y][X] = partida->jogador + 2;
+            if(partida->jogador == 1)
+                d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, 93, 43, "█");
+        }
+        
+        selecionaPeca(&Y, &X, partida);
+        d_Linha(25, 31, 0, 22, 96, 39, "█");
+        if(partida->tabuleiro[Y][X] != 0){
+            d_Linha(25, 31, 0, 22, 96, 39, "█");
+            printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
+        } else {
+            partida->tabuleiro[Y][X] = partida->jogador;
+        }
+    }
     getchar();
 }
 
 void fase2CPU(jogo* partida){
+    int Y = 0, X = 0;
     desenhaTabuleiro(partida);
-    d_Linha(3, 1, 0, 63, 97, 39, " ");
-    printf("\033[1;65H\033[97;45mJogando:");
-    printf("\033[2;65H\033[97;45mJogador %d", partida->jogador);
+    d_Linha(3, 1, 0, 73, 97, 39, " ");
+    printf("\033[1;75H\033[97;45mJogando:");
+    printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
     printf("\033[h\033[0m");
+    selecionaPeca(&Y, &X, partida);
     getchar();
 }
 
-void fase1(jogo* partida) {
-    int pecasJogador1 = 1, pecasJogador2 = 1;
-    int Y = 2, X = 2;
-    
-    printf("\033[6;52HPeças em");
-    printf("\033[7;54HJogo:");
-    d_Linha(9, 52, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
+void fase1(jogo* partida){
+    int Y = 2, X = 2; // Variáveis de posição
+    int jogador = 1; // Jogador 1 começa
+    int pecasPorJogador = 12; // Cada jogador começa com 12 peças
+    int pecasJogador1 = 0, pecasJogador2 = 0; // Contador de peças jogadas
+
+    printf("\033[6;62HPeças em");
+    printf("\033[7;64HJogo:");
+    d_Linha(9, 62, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
     printf(" = 0");
-    d_Linha(11, 52, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
+    d_Linha(11, 62, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
     printf(" = 0");
     printf("\033[0m");
 
-    for (int etapa = 0; etapa < 6; etapa++) {
-        for (int jogador = 1; jogador < 3; jogador++) {
-            int peca = 0; // Reseta para cada jogador
-            while (peca < 2) { // While ao invés de for pra controle mais restrito
-                printf("\033[3;18HJogador %d, adicione 2 peças", jogador);
-                entradaTeclado(&Y, &X, partida);
-                d_Linha(25, 21, 0, 22, 96, 39, "█");
-                if (Y == 2 && X == 2) { // Centro é proibido
-                    d_Linha(25, 21, 0, 22, 96, 39, "█");
-                    printf("\033[25;22H\033[31;106mMovimento Inválido!\033[0m");
-                    continue; // Pula iteração
-                }
-
-                if (partida->tabuleiro[Y][X] == 0) { // Se posição = vazia
-                    // Atualiza tabuleiro
-                    partida->tabuleiro[Y][X] = jogador;
-                    int cor = (jogador == 1) ? COR_JGDR_1 : COR_JGDR_2;
-                    d_Retangulo_Preenchido(LN + Y*3, COL + X*6, LN + 1 + Y*3, COL + 3 + X*6, cor, cor, "█");
-                    
-                    // Atualiza contagem de peças
-                    if (jogador == 1) {
-                        d_Linha(9, 52, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
-                        printf(" = %d", pecasJogador1++);
+    while (pecasJogador1 < pecasPorJogador || pecasJogador2 < pecasPorJogador) {
+        for (int turn = 0; turn < 2; turn++) { // Cada jogador tem dois turnos por round
+            if (jogador == 1) { // Turno do Jogador 1
+                bool movimento_Valido = false;
+                while (!movimento_Valido) {
+                    entradaTeclado(&Y, &X, partida); // Entrada de input do Jogador
+                    d_Linha(25, 31, 0, 22, 96, 39, "█");
+                    if (posicao_Valida(Y, X, partida)) { // Verifica se posição é válida
+                        partida->tabuleiro[Y][X] = 1; // Atualiza o tabuleiro
+                        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, COR_JGDR_1, COR_JGDR_1, "█"); // Desenha quadrado vermelho
+                        d_Linha(9, 62, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
+                        printf(" = %d", pecasJogador1+1);
+                        pecasJogador1++;
+                        movimento_Valido = true;
                     } else {
-                        d_Linha(11, 52, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
-                        printf(" = %d", pecasJogador2++);
+                        d_Linha(25, 31, 0, 22, 96, 39, "█");
+                        printf("\033[25;31H\033[31;106mMovimento Inválido!\033[0m");
                     }
-
-                    peca++; // Increment apenas após jogada válida
-                } else {
-                    d_Linha(25, 21, 0, 22, 96, 39, "█");
-                    printf("\033[25;24H\033[31;106mPosição ocupada!\033[0m");
+                }
+            } else { // Vez da CPU
+                bool movimento_Valido = false;
+                while (!movimento_Valido) {
+                    entradaTeclado(&Y, &X, partida); // Entrada de input do Jogador
+                    d_Linha(25, 31, 0, 22, 96, 39, "█");
+                    if (posicao_Valida(Y, X, partida)) { // Valida a escolha do jogador
+                        partida->tabuleiro[Y][X] = 2; // Atualiza o tabuleiro
+                        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, COR_JGDR_2, COR_JGDR_2, "█"); // Desenha quadrado azul
+                        d_Linha(11, 62, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
+                        printf(" = %d", pecasJogador2+1);
+                        pecasJogador2++;
+                        movimento_Valido = true;
+                    } else {
+                        d_Linha(25, 31, 0, 22, 96, 39, "█");
+                        printf("\033[25;31H\033[31;106mMovimento Inválido!\033[0m");
+                    }
                 }
             }
         }
+        // Alterna entre Jogador 1 e 2
+        jogador = (jogador == 1) ? 2 : 1;
     }
-    fase2(partida);
+    fase2(partida); 
 }
 
 void fase1CPU(jogo* partida) {
@@ -292,11 +402,11 @@ void fase1CPU(jogo* partida) {
     int pecasPorJogador = 12; // Cada jogador começa com 12 peças
     int pecasJogador1 = 0, pecasComputador = 0; // Contador de peças jogadas
 
-    printf("\033[6;52HPeças em");
-    printf("\033[7;54HJogo:");
-    d_Linha(9, 52, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
+    printf("\033[6;62HPeças em");
+    printf("\033[7;64HJogo:");
+    d_Linha(9, 62, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
     printf(" = 0");
-    d_Linha(11, 52, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
+    d_Linha(11, 62, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
     printf(" = 0");
     printf("\033[0m");
 
@@ -306,17 +416,17 @@ void fase1CPU(jogo* partida) {
                 bool movimento_Valido = false;
                 while (!movimento_Valido) {
                     entradaTeclado(&Y, &X, partida); // Entrada de input do Jogador
-                    d_Linha(25, 21, 0, 22, 96, 39, "█");
+                    d_Linha(25, 31, 0, 22, 96, 39, "█");
                     if (posicao_Valida(Y, X, partida)) { // Verifica se posição é válida
                         partida->tabuleiro[Y][X] = 1; // Atualiza o tabuleiro
-                        d_Retangulo_Preenchido(LN + Y * 3, COL + X * 6, LN + 1 + Y * 3, COL + 3 + X * 6, COR_JGDR_1, COR_JGDR_1, "█"); // Desenha quadrado vermelho
-                        d_Linha(9, 52, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
+                        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, COR_JGDR_1, COR_JGDR_1, "█"); // Desenha quadrado vermelho
+                        d_Linha(9, 62, 0, 2, COR_JGDR_1, COR_JGDR_1, "█");
                         printf(" = %d", pecasJogador1+1);
                         pecasJogador1++;
                         movimento_Valido = true;
                     } else {
-                        d_Linha(25, 21, 0, 22, 96, 39, "█");
-                        printf("\033[25;22H\033[31;106mMovimento Inválido!\033[0m");
+                        d_Linha(25, 31, 0, 22, 96, 39, "█");
+                        printf("\033[25;31H\033[31;106mMovimento Inválido!\033[0m");
                     }
                 }
             } else { // Vez da CPU
@@ -325,8 +435,8 @@ void fase1CPU(jogo* partida) {
                     CPUCriaPeca(&Y, &X, partida); // CPU seleciona posição
                     if (posicao_Valida(Y, X, partida)) { // Valida a escolha da CPU
                         partida->tabuleiro[Y][X] = 2; // Atualiza o tabuleiro
-                        d_Retangulo_Preenchido(LN + Y * 3, COL + X * 6, LN + 1 + Y * 3, COL + 3 + X * 6, COR_JGDR_2, COR_JGDR_2, "█"); // Desenha quadrado azul
-                        d_Linha(11, 52, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
+                        d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, COR_JGDR_2, COR_JGDR_2, "█"); // Desenha quadrado azul
+                        d_Linha(11, 62, 0, 2, COR_JGDR_2, COR_JGDR_2, "█");
                         printf(" = %d", pecasComputador+1);
                         pecasComputador++;
                         movimento_Valido = true;
@@ -359,8 +469,8 @@ void jogoLoop(int modo){
             {0, 0, 0, 0, 0}
         },
         .pecasTotal = 0,
-        .pecasJogador1 = 0,
-        .pecasJogador2 = 0,
+        .pecasJogador1 = 12,
+        .pecasJogador2 = 12,
         .jogador = 1,
         .tempoJogo = 0
     };
@@ -379,14 +489,14 @@ void jogoLoop(int modo){
 
 void desenhaMenuPrincipal(){
     int cor = 0;
-    int x = 22;
+    int x = 27;
 
     printf("\033[0m");
     // Desenha borda da tela
-    d_Linha(1, 1, 0, 80, 96, 30, "░");
-    d_Linha(25, 1, 0, 80, 96, 30, "░");
+    d_Linha(1, 1, 0, 90, 96, 30, "░");
+    d_Linha(25, 1, 0, 90, 96, 30, "░");
     d_Retangulo_Preenchido(2, 1, 25, 2, 96, 30, "░");
-    d_Retangulo_Preenchido(2, 79, 25, 80, 96, 30, "░");
+    d_Retangulo_Preenchido(2, 89, 25, 90, 96, 30, "░");
     
     // Desenhos em volta da logo
     for(int i = 0 ; i < 5 ; i++){  
@@ -398,37 +508,37 @@ void desenhaMenuPrincipal(){
         d_Linha(10, x + (i*8), 0, 6, cor, 39, "▄");
     }
 
-    d_Linha(6, 4, 0, 8, 31, 39, "░");
-    d_Linha(6, 12, 0, 8, 32, 39, "░");
-    d_Linha(8, 4, 0, 8, 35, 39, "░");
-    d_Linha(8, 12, 0, 8, 93, 39, "░");
+    d_Linha(6, 9, 0, 8, 31, 39, "░");
+    d_Linha(6, 17, 0, 8, 32, 39, "░");
+    d_Linha(8, 9, 0, 8, 35, 39, "░");
+    d_Linha(8, 17, 0, 8, 93, 39, "░");
 
-    d_Linha(6, 62, 0, 8, 93, 39, "░");
-    d_Linha(6, 70, 0, 8, 35, 39, "░");
-    d_Linha(8, 62, 0, 8, 32, 39, "░");
-    d_Linha(8, 70, 0, 8, 31, 39, "░");
+    d_Linha(6, 67, 0, 8, 93, 39, "░");
+    d_Linha(6, 75, 0, 8, 35, 39, "░");
+    d_Linha(8, 67, 0, 8, 32, 39, "░");
+    d_Linha(8, 75, 0, 8, 31, 39, "░");
 
     // Logo SEEGA
     for(int i = 0 ; i < 5 ; i++)
         d_Linha(5, x+(i*8), 0, 6, 97, 39, "█");
     for(int i = 0 ; i < 5 ; i++)
         d_Linha(6, x+(i*8), 0, 2, 97, 39, "█");
-    d_Linha(6, 58, 0, 2, 97, 39, "█");
+    d_Linha(6, 63, 0, 2, 97, 39, "█");
     for(int i = 1 ; i < 5 ; i++)
         d_Linha(7, x+(i*8), 0, 4, 97, 39, "█");
-    d_Linha(7, 22, 0, 6, 97, 39, "█");
-    d_Linha(7, 50, 0, 2, 97, 39, "█");
-    d_Linha(7, 58, 0, 2, 97, 39, "█");
+    d_Linha(7, 27, 0, 6, 97, 39, "█");
+    d_Linha(7, 55, 0, 2, 97, 39, "█");
+    d_Linha(7, 63, 0, 2, 97, 39, "█");
 
     for(int i = 1 ; i < 5 ; i++)
         d_Linha(8, x+(i*8), 0, 6, 97, 39, "█");
-    d_Linha(8, 26, 0, 2, 97, 39, "█");
+    d_Linha(8, 31, 0, 2, 97, 39, "█");
 
     for(int i = 0 ; i < 5 ; i++)
         d_Linha(9, x+(i*8), 0, 6, 97, 39, "█");
 
     // Logo SEEGA Sombra
-    x = 23;
+    x = 28;
     for(int i = 0 ; i < 5 ; i++)
         d_Linha(4, x+(i*8), 0, 6, 90, 39, "▄");
     for(int i = 0 ; i < 5 ; i++)
@@ -436,79 +546,80 @@ void desenhaMenuPrincipal(){
 
     for(int i = 0 ; i < 4 ; i++)
         d_Pixel(5, x+5+(i*8), 90, 39, "▀");
-    d_Linha(5, 60, 4, 0, 90, 39, "█");
+    d_Linha(5, 65, 4, 0, 90, 39, "█");
 
     for(int i = 0 ; i < 5 ; i++)
         d_Pixel(6, x+1 + (i*8), 90, 39, "█");
-    d_Pixel(6, 28, 90, 39, "▄");
-    d_Linha(7, 28, 2, 0, 90, 39, "█");
-    d_Linha(6, 25, 0, 3, 90, 39, "▄");
-    d_Linha(8, 23, 0, 3, 90, 39, "▄");
+    d_Pixel(6, 33, 90, 39, "▄");
+    d_Linha(7, 33, 2, 0, 90, 39, "█");
+    d_Linha(6, 30, 0, 3, 90, 39, "▄");
+    d_Linha(8, 28, 0, 3, 90, 39, "▄");
     for(int i = 1 ; i < 3 ; i++)
         d_Linha(6, x+2+(i*8), 0, 2, 90, 39, "▄");
-    d_Pixel(7, 34, 90, 39, "▀");
-    d_Pixel(7, 42, 90, 39, "▀");
+    d_Pixel(7, 39, 90, 39, "▀");
+    d_Pixel(7, 47, 90, 39, "▀");
 
     for(int i = 1 ; i < 5 ; i++)
         d_Pixel(8, x+1 + (i*8), 90, 39, "█");
-    d_Linha(8, 33, 0, 4, 90, 39, "▄");
-    d_Linha(8, 41, 0, 4, 90, 39, "▄");
-    d_Linha(6, 50, 0, 3, 90, 39, "▄");
-    d_Linha(7, 52, 2, 0, 90, 39, "█");
-    d_Linha(8, 57, 2, 0, 39, 39, " ");
-    d_Pixel(9, 56, 90, 39, "▀");
-    d_Pixel(6, 57, 90, 39, "▄");
-    d_Pixel(7, 48, 90, 39, "█");
-    d_Pixel(8, 49, 90, 39, "▄");
+    d_Linha(8, 38, 0, 4, 90, 39, "▄");
+    d_Linha(8, 46, 0, 4, 90, 39, "▄");
+    d_Linha(6, 55, 0, 3, 90, 39, "▄");
+    d_Linha(7, 57, 2, 0, 90, 39, "█");
+    d_Linha(8, 62, 2, 0, 39, 39, " ");
+    d_Pixel(9, 61, 90, 39, "▀");
+    d_Pixel(6, 62, 90, 39, "▄");
+    d_Pixel(7, 53, 90, 39, "█");
+    d_Pixel(8, 54, 90, 39, "▄");
+
 }
 
 void desenhaHistorico(){
     // Desenha borda da tela
-    d_Linha(1, 1, 0, 80, 96, 30, "░");
-    d_Linha(25, 1, 0, 80, 96, 30, "░");
+    d_Linha(1, 1, 0, 90, 96, 30, "░");
+    d_Linha(25, 1, 0, 90, 96, 30, "░");
     d_Retangulo_Preenchido(2, 1, 25, 2, 96, 30, "░");
-    d_Retangulo_Preenchido(2, 79, 25, 80, 96, 30, "░");
+    d_Retangulo_Preenchido(2, 89, 25, 90, 96, 30, "░");
 
-    puts("\033[3;31H\033[97;49mHistórico de Partidas");
-    d_Retangulo_Preenchido(5, 22, 23, 59, 37, 37, "█");
-    d_Linha(24, 23, 0, 38, 90, 39, "▀");
-    d_Linha(6, 60, 18, 0, 90, 39, "█");
-    d_Pixel(5, 60, 90, 39, "▄");
+    puts("\033[3;36H\033[97;49mHistórico de Partidas");
+    d_Retangulo_Preenchido(5, 27, 23, 64, 37, 37, "█");
+    d_Linha(24, 28, 0, 38, 90, 39, "▀");
+    d_Linha(6, 65, 18, 0, 90, 39, "█");
+    d_Pixel(5, 65, 90, 39, "▄");
 
-    puts("\033[21;4H\033[97;49mPressione [ESC]");
-    puts("\033[22;4H\033[97;49mpara retornar ao");
-    puts("\033[23;4H\033[97;49mmenu principal");
+    puts("\033[21;9H\033[97;49mPressione [ESC]");
+    puts("\033[22;9H\033[97;49mpara retornar ao");
+    puts("\033[23;9H\033[97;49mmenu principal");
 
-    d_Pixel(7, 23, 30, 37, "╔");
-    d_Linha(7, 24, 0, 34, 30, 37, "═");
-    d_Pixel(7, 37, 30, 37, "╤");
-    d_Pixel(7, 48, 30, 37, "╤");
-    d_Pixel(7, 58, 30, 37, "╗");
-    d_Linha(8, 58, 15, 0, 30, 37, "║");
-    d_Pixel(9, 58, 30, 37, "╢");
-    d_Pixel(20, 58, 30, 37, "╢");
-    d_Pixel(23, 58, 30, 37, "╝");
-    d_Linha(23, 24, 0, 34, 30, 37, "═");
-    d_Pixel(23, 23, 30, 37, "╚");
-    d_Linha(8, 23, 15, 0, 30, 37, "║");
-    d_Pixel(9, 23, 30, 37, "╟");
-    d_Pixel(20, 23, 30, 37, "╟");
+    d_Pixel(7, 28, 30, 37, "╔");
+    d_Linha(7, 29, 0, 34, 30, 37, "═");
+    d_Pixel(7, 42, 30, 37, "╤");
+    d_Pixel(7, 53, 30, 37, "╤");
+    d_Pixel(7, 63, 30, 37, "╗");
+    d_Linha(8, 63, 15, 0, 30, 37, "║");
+    d_Pixel(9, 63, 30, 37, "╢");
+    d_Pixel(20, 63, 30, 37, "╢");
+    d_Pixel(23, 63, 30, 37, "╝");
+    d_Linha(23, 29, 0, 34, 30, 37, "═");
+    d_Pixel(23, 28, 30, 37, "╚");
+    d_Linha(8, 28, 15, 0, 30, 37, "║");
+    d_Pixel(9, 28, 30, 37, "╟");
+    d_Pixel(20, 28, 30, 37, "╟");
 
-    d_Linha(8, 37, 12, 0, 30, 37, "│");
-    d_Linha(8, 48, 12, 0, 30, 37, "│");
-    d_Linha(9, 24, 0, 34, 30, 37, "─");
-    d_Linha(20, 24, 0, 34, 30, 37, "─");
-    d_Pixel(9, 37, 30, 37, "┼");
-    d_Pixel(9, 48, 30, 37, "┼");
-    d_Pixel(20, 37, 30, 37, "┴");
-    d_Pixel(20, 48, 30, 37, "┴");
+    d_Linha(8, 42, 12, 0, 30, 37, "│");
+    d_Linha(8, 53, 12, 0, 30, 37, "│");
+    d_Linha(9, 29, 0, 34, 30, 37, "─");
+    d_Linha(20, 29, 0, 34, 30, 37, "─");
+    d_Pixel(9, 42, 30, 37, "┼");
+    d_Pixel(9, 53, 30, 37, "┼");
+    d_Pixel(20, 42, 30, 37, "┴");
+    d_Pixel(20, 53, 30, 37, "┴");
 
-    puts("\033[6;25H\033[30;47mTotal:");
-    puts("\033[6;43H\033[30;47mPágina   de");
+    puts("\033[6;30H\033[30;47mTotal:");
+    puts("\033[6;48H\033[30;47mPágina   de");
 
-    puts("\033[8;26H\033[30;47mVencedor:");
-    puts("\033[8;40H\033[30;47mTempo:");
-    puts("\033[8;51H\033[30;47mModo:");
+    puts("\033[8;31H\033[30;47mVencedor:");
+    puts("\033[8;45H\033[30;47mTempo:");
+    puts("\033[8;56H\033[30;47mModo:");
 
     getchar();
     printf("\033[0m");
@@ -528,7 +639,7 @@ void menuPrincipal() {
     };
     const int numOpcoes = 5; // Número de itens no menu
     const int Ln = 14; // Linha de base para o texto do menu
-    const int Col = 36; // Coluna base para o texto do menu
+    const int Col = 41; // Coluna base para o texto do menu
     int posicao = 0; // Opção selecionada
 
     while (1){
@@ -564,7 +675,7 @@ void menuPrincipal() {
     //printf("\033[%d;%df%s\n", Ln + numOpcoes + 2, Col - 10, opcoes[posicao]);
     switch (posicao){
     case 0:
-        d_Retangulo_Preenchido(13, 34, 20, 49, 39, 39, " ");
+        d_Retangulo_Preenchido(13, 39, 20, 49, 39, 39, " ");
         menuNovoJogo();
         break;
     case 1:
@@ -592,7 +703,7 @@ void menuNovoJogo(){
     };
     const int numOpcoes = 3; // Número de itens no menu
     const int Ln = 14; // Linha de base para o texto do menu
-    const int Col = 32; // Coluna base para o texto do menu
+    const int Col = 37; // Coluna base para o texto do menu
     int posicao = 0; // Opção selecionada
 
     while (1){
@@ -636,7 +747,7 @@ void menuNovoJogo(){
         jogoLoop(0);
         break;
     case 2:
-        d_Retangulo_Preenchido(13, 31, 17, 56, 39, 39, " ");
+        d_Retangulo_Preenchido(13, 36, 17, 61, 39, 39, " ");
         menuPrincipal();
         break;
     }
