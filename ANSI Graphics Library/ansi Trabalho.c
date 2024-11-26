@@ -16,6 +16,7 @@
 #define ALTURA 25
 #define COR_JGDR_1 31
 #define COR_JGDR_2 34
+#define TAM_TABULEIRO 5
 #define LN 6
 #define COL 26
 
@@ -32,11 +33,11 @@ typedef struct{
     long tempoJogo;
 } jogo;
 
-void d_preenche_Tela(int _FGColor, int _corFundo, char* _Char);
-void d_Retangulo(int _yPos1, int _xPos1, int _yPos2, int _xPos2, int _FGColor, int _corFundo, char* _Char);
-void d_Retangulo_Preenchido(int _yPos1, int _xPos1, int _yPos2, int _xPos2, int _FGColor, int _corFundo, char* _Char);
-void d_Linha(int _yPos, int _xPos, int _ySize, int _xSize, int _FGColor, int _corFundo, char* _Char);
-void d_Pixel(int _yPos, int _xPos, int _FGColor, int _corFundo, char* _Char);
+void d_preenche_Tela(int _Cor, int _corFundo, char* _Char);
+void d_Retangulo(int _yPos1, int _xPos1, int _yPos2, int _xPos2, int _Cor, int _corFundo, char* _Char);
+void d_Retangulo_Preenchido(int _yPos1, int _xPos1, int _yPos2, int _xPos2, int _Cor, int _corFundo, char* _Char);
+void d_Linha(int _yPos, int _xPos, int _yTamanho, int _xTamanho, int _Cor, int _corFundo, char* _Char);
+void d_Pixel(int _yPos, int _xPos, int _Cor, int _corFundo, char* _Char);
 
 void desenhaMenuPrincipal();
 void desenhaMenuLateral();
@@ -46,7 +47,9 @@ void desenhaTabuleiro(jogo *_partida);
 void menuPrincipal();
 void menuNovoJogo();
 void jogoLoop(int _modo);
-//void avaliacao(int* _Y, int* _X, jogo* partida);
+bool dentroDoLimite(int _Y, int _X);
+void avaliacao(int* _Y, int* _X, jogo* _partida);
+void avaliacaoReseta(int* _Y, int* _X, jogo* _partida);
 int entradaTeclado(int* _rY, int* _rX, jogo* _partida);
 bool posicao_Valida(int _Y, int _X, jogo* _partida);
 
@@ -96,6 +99,10 @@ void desenhaTabuleiro(jogo* partida){
     d_Pixel(5, 53, 97, 39, "5");
 }
 
+void desenhaPosicao(int Y, int X, int Cor, int corFundo){
+    d_Retangulo_Preenchido(LN+1 + (Y*3), COL+2 + (X*6), LN+2 + (Y*3), COL+5 + (X*6), Cor, corFundo+10, "█");
+}
+
 int selecionaPeca(int* rY, int* rX, jogo* partida){
     int tabuleiro[5][5];
     int Y = *rY;
@@ -110,10 +117,6 @@ int selecionaPeca(int* rY, int* rX, jogo* partida){
             cor = COR_JGDR_2;
         else if(partida->tabuleiro[Y][X] == 1)
             cor = COR_JGDR_1;
-        else if(partida->tabuleiro[Y][X] == 3)
-            cor = 33;
-        else if(partida->tabuleiro[Y][X] == 4)
-            cor = 32;
 
         d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor+60, cor+60, "█");
 
@@ -123,35 +126,39 @@ int selecionaPeca(int* rY, int* rX, jogo* partida){
             switch (tecla) {
                 case 72:    // Cima
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    avaliacaoReseta(&Y, &X, partida);
                     Y -= 1;
                     if(Y < 0)
                         Y = 4;
                     //getch();
-                    //avaliacao(&Y, &X, partida);
+                    avaliacao(&Y, &X, partida);
                     break;
                 case 80:    // Baixo
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    avaliacaoReseta(&Y, &X, partida);                                        
                     Y += 1;
                     if(Y > 4)
                         Y = 0;
                     //getch();
-                    //avaliacao(&Y, &X, partida);
+                    avaliacao(&Y, &X, partida);
                     break;
                 case 75:    // Esquerda
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    avaliacaoReseta(&Y, &X, partida); 
                     X -= 1;
                     if(X < 0)
                         X = 4;
                     //getch();
-                    //avaliacao(&Y, &X, partida);
+                    avaliacao(&Y, &X, partida);
                     break;
                 case 77:    // Direita
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
+                    avaliacaoReseta(&Y, &X, partida);
                     X += 1;
                     if(X > 4)
                         X = 0;    
                     //getch();
-                    //avaliacao(&Y, &X, partida);
+                    avaliacao(&Y, &X, partida);
                     break;
                 default:
                     continue;
@@ -287,13 +294,156 @@ void CPUCriaPeca(int* pY, int* pX, jogo* partida) {
     }
 }
 
-/*
-void avaliacao(int* Y, int* X, jogo* partida){
-    if(partida->tabuleiro[*Y-1][*X] == 0){
-        d_Retangulo_Preenchido();
+void checaCapturaFutura(int novoY, int novoX, int corPecaCaptura, jogo* partida, int jogador, int adversario) {
+    // Direction vectors: {dy, dx} for up, down, left, right
+    int direcoes[4][2] = {
+        {-1, 0}, // Up
+        {1, 0},  // Down
+        {0, -1}, // Left
+        {0, 1}   // Right
+    };
+
+    // Check each direction
+    for (int i = 0; i < 4; i++) {
+        int dy = direcoes[i][0];
+        int dx = direcoes[i][1];
+
+        int yAtual = novoY + dy;
+        int xAtual = novoX + dx;
+
+        // Skip captures if the adversary piece is at the center (Y = 2, X = 2)
+        if ((yAtual == 2 && xAtual == 2) || (novoY == 2 && novoX == 2)) {
+            continue;
+        }
+
+        // Check if the first piece is the adversary's
+        if (dentroDoLimite(yAtual, xAtual) && partida->tabuleiro[yAtual][xAtual] == adversario) {
+            // Continue moving in this direction to find the player's piece
+            yAtual += dy;
+            xAtual += dx;
+
+            while (dentroDoLimite(yAtual, xAtual)) {
+                if (partida->tabuleiro[yAtual][xAtual] == jogador) {
+                    // Found a valid capture, highlight all adversary pieces in between
+                    int yCaptura = novoY + dy;
+                    int xCaptura = novoX + dx;
+
+                    while (yCaptura != yAtual || xCaptura != xAtual) {
+                        desenhaPosicao(yCaptura, xCaptura, corPecaCaptura, corPecaCaptura);
+                        yCaptura += dy;
+                        xCaptura += dx;
+                    }
+                    break; // Exit the loop since capture is complete
+                } else if (partida->tabuleiro[yAtual][xAtual] == 0) {
+                    // Encountered an empty space, no capture possible in this direction
+                    break;
+                }
+
+                // Continue searching in the same direction
+                yAtual += dy;
+                xAtual += dx;
+            }
+        }
     }
 }
-*/
+
+void checaMovimentoComCaptura(int Y, int X, int corJogPossivel, int corPecaCaptura, jogo* partida, int jogador, int adversario) {
+    if (dentroDoLimite(Y, X) && partida->tabuleiro[Y][X] == 0) {
+        // Highlight the potential movement in green
+        desenhaPosicao(Y, X, corJogPossivel, corJogPossivel);
+
+        // Simulate this move and check for captures
+        checaCapturaFutura(Y, X, corPecaCaptura, partida, jogador, adversario);
+    }
+}
+
+bool dentroDoLimite(int Y, int X) {
+    return Y >= 0 && Y < TAM_TABULEIRO && X >= 0 && X < TAM_TABULEIRO;
+}
+
+void avaliacao(int* Y, int* X, jogo* partida) {
+    int corJogPossivel = 32;
+    int corPecaCaptura = 35;
+    int adversario = (partida->jogador == 1) ? 2 : 1;
+
+    if (partida->tabuleiro[*Y][*X] == partida->jogador) {
+        // Define directions for movement: {dy, dx}
+        int direcoes[4][2] = {
+            {-1, 0}, // Up
+            {1, 0},  // Down
+            {0, -1}, // Left
+            {0, 1}   // Right
+        };
+
+        // Loop through all possible moves
+        for (int i = 0; i < 4; i++) {
+            int dy = direcoes[i][0];
+            int dx = direcoes[i][1];
+            int novoY = *Y + dy;
+            int novoX = *X + dx;
+
+            // Check possible movements and associated captures
+            checaMovimentoComCaptura(novoY, novoX, corJogPossivel, corPecaCaptura, partida, partida->jogador, adversario);
+        }
+    }
+}
+
+void avaliacaoReseta(int* Y, int* X, jogo* partida){
+    int corCapturaOrig;
+    int adversario;
+    
+    corCapturaOrig = partida->jogador == 1 ? 34 : 31;
+    adversario = partida->jogador == 1 ? 2 : 1;
+
+    if(partida->tabuleiro[*Y-1][*X] == 0 && (*Y-1 >= 0)){
+        desenhaPosicao(*Y-1, *X, 30, 30);
+        if(partida->tabuleiro[*Y-1][*X-2] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
+            desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y-3][*X] == partida->jogador && partida->tabuleiro[*Y-2][*X] == adversario){
+            desenhaPosicao(*Y-2, *X, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y-1][*X+2] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
+            desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
+        }
+    }
+    if(partida->tabuleiro[*Y+1][*X] == 0 && (*Y+1 <= 4)){
+        desenhaPosicao(*Y+1, *X, 30, 30);
+        if(partida->tabuleiro[*Y+1][*X+2] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
+             desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y+3][*X] == partida->jogador && partida->tabuleiro[*Y+2][*X] == adversario){
+            desenhaPosicao(*Y+2, *X, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y+1][*X-2] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
+            desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
+        }
+    }
+    if(partida->tabuleiro[*Y][*X-1] == 0 && (*X-1 >= 0)){
+        desenhaPosicao(*Y, *X-1, 30, 30);
+        if(partida->tabuleiro[*Y+2][*X-1] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
+            desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y][*X-3] == partida->jogador && partida->tabuleiro[*Y][*X-2] == adversario){
+            desenhaPosicao(*Y, *X-2, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y-2][*X-1] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
+            desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
+        }
+    }
+    if(partida->tabuleiro[*Y][*X+1] == 0 && (*X+1 <= 4)){
+        desenhaPosicao(*Y, *X+1, 30, 30);
+        if(partida->tabuleiro[*Y+2][*X+1] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
+            desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y][*X+3] == partida->jogador && partida->tabuleiro[*Y][*X+2] == adversario){
+            desenhaPosicao(*Y, *X+2, corCapturaOrig, corCapturaOrig);
+        }
+        if(partida->tabuleiro[*Y-2][*X+1] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
+            desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
+        }
+    }
+}
 
 void fase2(jogo* partida){
     int Y = 0, X = 0;
@@ -305,24 +455,6 @@ void fase2(jogo* partida){
     printf("\033[h\033[0m");
     while(1){
         selecionaPeca(&Y, &X, partida);
-        d_Linha(25, 31, 0, 22, 96, 39, "█");
-        if(partida->jogador != partida->tabuleiro[Y][X] || partida->tabuleiro[Y][X] == 0){
-            d_Linha(25, 31, 0, 22, 96, 39, "█");
-            printf("\033[25;32H\033[31;106mSeleção Inválida!\033[0m");
-        } else {
-            partida->tabuleiro[Y][X] = partida->jogador + 2;
-            if(partida->jogador == 1)
-                d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, 93, 43, "█");
-        }
-        
-        selecionaPeca(&Y, &X, partida);
-        d_Linha(25, 31, 0, 22, 96, 39, "█");
-        if(partida->tabuleiro[Y][X] != 0){
-            d_Linha(25, 31, 0, 22, 96, 39, "█");
-            printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
-        } else {
-            partida->tabuleiro[Y][X] = partida->jogador;
-        }
     }
     getchar();
 }
@@ -463,10 +595,10 @@ void jogoLoop(int modo){
     jogo partida = {
         .tabuleiro = {
             {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0}
+            {0, 1, 1, 0, 1},
+            {0, 2, 2, 2, 0},
+            {1, 0, 0, 1, 0},
+            {0, 1, 0, 0, 0}
         },
         .pecasTotal = 0,
         .pecasJogador1 = 12,
@@ -482,7 +614,7 @@ void jogoLoop(int modo){
     desenhaTabuleiro(&partida);
 
     if(modo)
-        fase1(&partida);
+        fase2(&partida);
     else
         fase1CPU(&partida);
 }
