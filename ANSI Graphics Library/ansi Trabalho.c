@@ -388,59 +388,48 @@ void avaliacao(int* Y, int* X, jogo* partida) {
     }
 }
 
-void avaliacaoReseta(int* Y, int* X, jogo* partida){
-    int corCapturaOrig;
-    int adversario;
-    
-    corCapturaOrig = partida->jogador == 1 ? 34 : 31;
-    adversario = partida->jogador == 1 ? 2 : 1;
+void avaliacaoReseta(int* Y, int* X, jogo* partida) {
+    int corCapturaOrig = (partida->jogador == 1) ? 34 : 31; // Original color of adversary pieces
+    int adversario = (partida->jogador == 1) ? 2 : 1;
 
-    if(partida->tabuleiro[*Y-1][*X] == 0 && (*Y-1 >= 0)){
-        desenhaPosicao(*Y-1, *X, 30, 30);
-        if(partida->tabuleiro[*Y-1][*X-2] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
-            desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y-3][*X] == partida->jogador && partida->tabuleiro[*Y-2][*X] == adversario){
-            desenhaPosicao(*Y-2, *X, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y-1][*X+2] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
-            desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
-        }
-    }
-    if(partida->tabuleiro[*Y+1][*X] == 0 && (*Y+1 <= 4)){
-        desenhaPosicao(*Y+1, *X, 30, 30);
-        if(partida->tabuleiro[*Y+1][*X+2] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
-             desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y+3][*X] == partida->jogador && partida->tabuleiro[*Y+2][*X] == adversario){
-            desenhaPosicao(*Y+2, *X, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y+1][*X-2] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
-            desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
-        }
-    }
-    if(partida->tabuleiro[*Y][*X-1] == 0 && (*X-1 >= 0)){
-        desenhaPosicao(*Y, *X-1, 30, 30);
-        if(partida->tabuleiro[*Y+2][*X-1] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
-            desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y][*X-3] == partida->jogador && partida->tabuleiro[*Y][*X-2] == adversario){
-            desenhaPosicao(*Y, *X-2, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y-2][*X-1] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
-            desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
-        }
-    }
-    if(partida->tabuleiro[*Y][*X+1] == 0 && (*X+1 <= 4)){
-        desenhaPosicao(*Y, *X+1, 30, 30);
-        if(partida->tabuleiro[*Y+2][*X+1] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
-            desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y][*X+3] == partida->jogador && partida->tabuleiro[*Y][*X+2] == adversario){
-            desenhaPosicao(*Y, *X+2, corCapturaOrig, corCapturaOrig);
-        }
-        if(partida->tabuleiro[*Y-2][*X+1] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
-            desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
+    // Direction vectors for up, down, left, and right
+    int direcoes[4][2] = {
+        {-1, 0}, // Up
+        {1, 0},  // Down
+        {0, -1}, // Left
+        {0, 1}   // Right
+    };
+
+    // Loop through each possible direction
+    for (int i = 0; i < 4; i++) {
+        int dy = direcoes[i][0];
+        int dx = direcoes[i][1];
+
+        // Calculate new Y and X positions
+        int novoY = *Y + dy;
+        int novoX = *X + dx;
+
+        // Check if the move is valid and reset its color
+        if (dentroDoLimite(novoY, novoX) && partida->tabuleiro[novoY][novoX] == 0) {
+            desenhaPosicao(novoY, novoX, 30, 30); // Reset the position to its original color
+
+            // Continue in the same direction to check for highlighted captures
+            int yAtual = novoY + dy;
+            int xAtual = novoX + dx;
+
+            while (dentroDoLimite(yAtual, xAtual)) {
+                // If it's the adversary's piece, reset its color
+                if (partida->tabuleiro[yAtual][xAtual] == adversario) {
+                    desenhaPosicao(yAtual, xAtual, corCapturaOrig, corCapturaOrig);
+                } else if (partida->tabuleiro[yAtual][xAtual] == partida->jogador || partida->tabuleiro[yAtual][xAtual] == 0) {
+                    // If we encounter the player's piece or an empty space, stop checking further in this direction
+                    break;
+                }
+
+                // Move further in the same direction
+                yAtual += dy;
+                xAtual += dx;
+            }
         }
     }
 }
