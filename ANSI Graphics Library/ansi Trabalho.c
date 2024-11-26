@@ -303,96 +303,89 @@ void CPUCriaPeca(int* pY, int* pX, jogo* partida) {
     }
 }
 
-void checaCapturaFutura(int novoY, int novoX, int corPecaCaptura, jogo* partida, int jogador, int adversario) {
-    // Direction vectors: {dy, dx} for up, down, left, right
-    int direcoes[4][2] = {
-        {-1, 0}, // Up
-        {1, 0},  // Down
-        {0, -1}, // Left
-        {0, 1}   // Right
-    };
-
-    // Check each direction
-    for (int i = 0; i < 4; i++) {
-        int dy = direcoes[i][0];
-        int dx = direcoes[i][1];
-
-        int yAtual = novoY + dy;
-        int xAtual = novoX + dx;
-
-        // Skip captures if the adversary piece is at the center (Y = 2, X = 2)
-        if ((yAtual == 2 && xAtual == 2) || (novoY == 2 && novoX == 2)) {
-            continue;
-        }
-
-        // Check if the first piece is the adversary's
-        if (dentroDoLimite(yAtual, xAtual) && partida->tabuleiro[yAtual][xAtual] == adversario) {
-            // Continue moving in this direction to find the player's piece
-            yAtual += dy;
-            xAtual += dx;
-
-            while (dentroDoLimite(yAtual, xAtual)) {
-                if (partida->tabuleiro[yAtual][xAtual] == jogador) {
-                    // Found a valid capture, highlight all adversary pieces in between
-                    int yCaptura = novoY + dy;
-                    int xCaptura = novoX + dx;
-
-                    while (yCaptura != yAtual || xCaptura != xAtual) {
-                        desenhaPosicao(yCaptura, xCaptura, corPecaCaptura, corPecaCaptura);
-                        yCaptura += dy;
-                        xCaptura += dx;
-                    }
-                    break; // Exit the loop since capture is complete
-                } else if (partida->tabuleiro[yAtual][xAtual] == 0) {
-                    // Encountered an empty space, no capture possible in this direction
-                    break;
-                }
-
-                // Continue searching in the same direction
-                yAtual += dy;
-                xAtual += dx;
-            }
-        }
-    }
-}
-
-void checaMovimentoComCaptura(int Y, int X, int corJogPossivel, int corPecaCaptura, jogo* partida, int jogador, int adversario) {
-    if (dentroDoLimite(Y, X) && partida->tabuleiro[Y][X] == 0) {
-        // Highlight the potential movement in green
-        desenhaPosicao(Y, X, corJogPossivel, corJogPossivel);
-
-        // Simulate this move and check for captures
-        checaCapturaFutura(Y, X, corPecaCaptura, partida, jogador, adversario);
-    }
-}
-
 bool dentroDoLimite(int Y, int X) {
     return Y >= 0 && Y < TAM_TABULEIRO && X >= 0 && X < TAM_TABULEIRO;
 }
 
-void avaliacao(int* Y, int* X, jogo* partida) {
+void avaliacao(int* Y, int* X, jogo* partida){
     int corJogPossivel = 32;
     int corPecaCaptura = 35;
-    int adversario = (partida->jogador == 1) ? 2 : 1;
+    int adversario;
 
-    if (partida->tabuleiro[*Y][*X] == partida->jogador) {
-        // Define directions for movement: {dy, dx}
-        int direcoes[4][2] = {
-            {-1, 0}, // Up
-            {1, 0},  // Down
-            {0, -1}, // Left
-            {0, 1}   // Right
-        };
+    adversario = (partida->jogador == 1) ? 2 : 1;
 
-        // Loop through all possible moves
-        for (int i = 0; i < 4; i++) {
-            int dy = direcoes[i][0];
-            int dx = direcoes[i][1];
-            int novoY = *Y + dy;
-            int novoX = *X + dx;
-
-            // Check possible movements and associated captures
-            checaMovimentoComCaptura(novoY, novoX, corJogPossivel, corPecaCaptura, partida, partida->jogador, adversario);
+    if(partida->tabuleiro[*Y][*X] == partida->jogador){
+        if(partida->tabuleiro[*Y-1][*X] == 0 && (*Y-1 >= 0)){
+            desenhaPosicao(*Y-1, *X, corJogPossivel, corJogPossivel);
+            if(partida->tabuleiro[*Y-1][*X-2] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y-1][*X-1] == adversario && (*Y-1 != 2 || *X-1 != 2)){
+            if(dentroDoLimite(*Y-1, *X-1))
+                desenhaPosicao(*Y-1, *X-1, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y-3][*X] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y-2][*X] == adversario && (*Y-2 != 2 || *X != 2)){
+            if(dentroDoLimite(*Y-2, *X))
+                desenhaPosicao(*Y-2, *X, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y-1][*X+2] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y-1][*X+1] == adversario && (*Y-1 != 2 || *X+1 != 2)){
+            if(dentroDoLimite(*Y-1, *X+1))
+                desenhaPosicao(*Y-1, *X+1, corPecaCaptura, corPecaCaptura);
+            }
+        }
+        if(partida->tabuleiro[*Y+1][*X] == 0 && (*Y+1 <= 4)){
+            desenhaPosicao(*Y+1, *X, corJogPossivel, corJogPossivel);
+            if(partida->tabuleiro[*Y+1][*X+2] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y+1][*X+1] == adversario && (*Y+1 != 2 || *X+1 != 2)){
+            if(dentroDoLimite(*Y+1, *X+1))
+                desenhaPosicao(*Y+1, *X+1, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y+3][*X] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y+2][*X] == adversario && (*Y+2 != 2 || *X != 2)){
+            if(dentroDoLimite(*Y+2, *X))
+                desenhaPosicao(*Y+2, *X, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y+1][*X-2] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y+1][*X-1] == adversario && (*Y+1 != 2 || *X-1 != 2)){
+            if(dentroDoLimite(*Y+1, *X-1))
+                desenhaPosicao(*Y+1, *X-1, corPecaCaptura, corPecaCaptura);
+            }
+        }
+        if(partida->tabuleiro[*Y][*X-1] == 0 && (*X-1 >= 0)){
+            desenhaPosicao(*Y, *X-1, corJogPossivel, corJogPossivel);
+            if(partida->tabuleiro[*Y+2][*X-1] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y+1][*X-1] == adversario && (*Y+1 != 2 || *X-1 != 2)){
+            if(dentroDoLimite(*Y+1, *X-1))
+                desenhaPosicao(*Y+1, *X-1, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y][*X-3] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y][*X-2] == adversario && (*Y != 2 || *X-2 != 2)){
+            if(dentroDoLimite(*Y, *X-2))
+                desenhaPosicao(*Y, *X-2, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y-2][*X-1] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y-1][*X-1] == adversario && (*Y-1 != 2 || *X-1 != 2)){
+            if(dentroDoLimite(*Y-1, *X-1))
+                desenhaPosicao(*Y-1, *X-1, corPecaCaptura, corPecaCaptura);
+            }
+        }
+        if(partida->tabuleiro[*Y][*X+1] == 0 && (*X+1 <= 4)){
+            desenhaPosicao(*Y, *X+1, corJogPossivel, corJogPossivel);
+            if(partida->tabuleiro[*Y+2][*X+1] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y+1][*X+1] == adversario && (*Y+1 != 2 || *X+1 != 2)){
+            if(dentroDoLimite(*Y+1, *X+1))
+                desenhaPosicao(*Y+1, *X+1, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y][*X+3] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y][*X+2] == adversario && (*Y != 2 || *X+2 != 2)){
+            if(dentroDoLimite(*Y, *X+2))
+                desenhaPosicao(*Y, *X+2, corPecaCaptura, corPecaCaptura);
+            }
+            if(partida->tabuleiro[*Y-2][*X+1] == partida->jogador && dentroDoLimite(*Y, *X) &&
+            partida->tabuleiro[*Y-1][*X+1] == adversario && (*Y-1 != 2 || *X+1 != 2)){
+            if(dentroDoLimite(*Y-1, *X+1))
+                desenhaPosicao(*Y-1, *X+1, corPecaCaptura, corPecaCaptura);
+            }
         }
     }
 }
@@ -454,15 +447,101 @@ void avaliacaoReseta(int* Y, int* X, jogo* partida){
     }
 }
 
+void mostraMovimentosValidos(int Y, int X, jogo* partida){
+    int adversario = (partida->jogador == 1) ? 2 : 1;
+
+    if (partida->tabuleiro[Y][X] == partida->jogador) {
+        // Define directions for movement: {dy, dx}
+        int direcoes[4][2] = {
+            {-1, 0}, // Up
+            {1, 0},  // Down
+            {0, -1}, // Left
+            {0, 1}   // Right
+        };
+
+        // Loop through all possible moves
+        for (int i = 0; i < 4; i++) {
+            int dy = direcoes[i][0];
+            int dx = direcoes[i][1];
+            int novoY = Y + dy;
+            int novoX = X + dx;
+        }
+    }
+}
+
+int isDestinoValido(int Y, int X, jogo *partida, int pecaY, int pecaX) {
+    // Define directions for movement: {dy, dx}
+    int direcoes[4][2] = {
+        {-1, 0}, // Up
+        {1, 0},  // Down
+        {0, -1}, // Left
+        {0, 1}   // Right
+    };
+
+    // Ensure the destination is within the bounds of the board
+    if (Y < 0 || Y >= TAM_TABULEIRO || X < 0 || X >= TAM_TABULEIRO) {
+        return 0; // Out of bounds
+    }
+
+    // Ensure the destination is empty
+    if (partida->tabuleiro[Y][X] != 0) {
+        return 0; // Destination is not empty
+    }
+
+    // Check if the destination is reachable (valid movement or capture)
+    for (int i = 0; i < 4; i++) {
+        int dy = direcoes[i][0];
+        int dx = direcoes[i][1];
+
+        // Check adjacent squares for valid movement
+        if (Y == pecaY + dy && X == pecaX + dx) {
+            return 1; // Valid move to an adjacent square
+        }
+
+        // Check for captures
+        int capturaY = pecaY + dy;
+        int capturaX = pecaX + dx;
+        int destinoCapturaY = capturaY + dy;
+        int destinoCapturaX = capturaX + dx;
+
+        // Ensure the capture follows game rules
+        if (Y == destinoCapturaY && X == destinoCapturaX) {
+            // Ensure there's an opponent piece to capture
+            if (partida->tabuleiro[capturaY][capturaX] == (partida->jogador == 1 ? 2 : 1)) {
+                return 1; // Valid capture move
+            }
+        }
+    }
+
+    // If none of the conditions are met, the destination is invalid
+    return 0;
+}
+
 void fase2(jogo* partida){
     int Y = 2, X = 2;
-    desenhaTabuleiro(partida);
-    d_Linha(3, 1, 0, 73, 97, 39, " ");
-    printf("\033[1;75H\033[97;45mJogando:");
-    printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
-    printf("\033[h\033[0m");
-    while(1){
-        selecionaPeca(&Y, &X, partida);
+    int pecaY = 0, pecaX = 0;
+    bool jogando = 1;           // Quando for 0 o jogo acabou
+    bool pecaSelecionada = 0;   // 0 se nenhuma peça foi selecionada
+    bool destinoValido = 0;     // Flag para movimento válido
+    
+    
+    while(jogando){
+        desenhaTabuleiro(partida);
+        d_Linha(3, 1, 0, 73, 97, 39, " ");
+        printf("\033[1;75H\033[97;45mJogando:");
+        printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
+        printf("\033[h\033[0m");
+
+        pecaSelecionada = 0;
+        destinoValido = 0;
+
+        while(!pecaSelecionada){
+            selecionaPeca(&Y, &X, partida);
+            if(partida->tabuleiro[Y][X] == partida->jogador){
+
+            }
+        }
+
     }
     getchar();
 }
@@ -599,8 +678,8 @@ void novoJogoInicializa(int modo){
     jogo partida = {
         .tabuleiro = {
             {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0},
+            {0, 0, 0, 1, 2},
+            {0, 1, 0, 0, 0},
             {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0}
         },
@@ -618,7 +697,7 @@ void novoJogoInicializa(int modo){
     desenhaTabuleiro(&partida);
 
     if(modo)
-        fase1(&partida);
+        fase2(&partida);
     else
         fase1CPU(&partida);
 }
