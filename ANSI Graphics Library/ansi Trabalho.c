@@ -625,13 +625,10 @@ void avaliacao_reseta(int* Y, int* X, jogo* partida){
 }
 
 bool avaliacao_trancado(jogo* partida){
-    for (int i = 0 ; i < TAM_TABULEIRO ; i++){
-        for (int j = 0 ; j < TAM_TABULEIRO ; j++){
-            if (partida->tabuleiro[i][j] == partida->jogador && avaliacao_silenciosa_movimento(i, j, partida)){
+    for (int i = 0 ; i < TAM_TABULEIRO ; i++)
+        for (int j = 0 ; j < TAM_TABULEIRO ; j++)
+            if (partida->tabuleiro[i][j] == partida->jogador && avaliacao_silenciosa_movimento(i, j, partida))
                 return false;
-            }
-        }
-    }
     return true;
 }
 
@@ -671,6 +668,154 @@ void removePeca(int Y, int X, jogo* partida, bool* pecaCapturada){
     }
 }
 
+/*short verificaVitoria(jogo* partida){
+    short adversario = (partida->jogador == 1) ? 2 : 1;
+    short semCapturas = 0;
+    short pecas = 0;
+    short BarX = 0, BarY = 0;
+
+    for (int y = 1; y < 4; y++){
+        int count = 0;
+        for (int x = 1; x < 4; x++){
+            if (partida->tabuleiro[y][x] == partida->jogador){
+                count++;
+            } else 
+                count = 0;
+
+            if (count == 5){
+                BarX = x;
+            }
+        }
+    }
+    for (int x = 1; x < 4; x++){
+        int count = 0;
+        for (int y = 1; y < 4; y++){
+            if (partida->tabuleiro[y][x] == partida->jogador){
+                count++;
+            } else
+                count = 0;
+
+            if (count == 5){
+                BarY = y;
+            }
+        }
+    }
+
+    for(int y = BarY ; y < 5 ; y++)
+        for(int x = BarX ; x < 5 ; x++)
+            if(partida->tabuleiro[y][x] == adversario)
+                pecas += 1;
+
+    if(partida->jogador == 1){
+        if(pecas == partida->pecasJogador2){
+            return 1;
+        }
+    } else if(partida->jogador == 2){
+        if(pecas == partida->pecasJogador1){
+            printf("\033[4;25HJOGADOR 2 FILL");
+            return 2;
+        }
+    }
+
+    if(partida->pecasJogador1 <= 3 && partida->pecasJogador2 <= 3){
+        for (int i = 0 ; i < TAM_TABULEIRO ; i++){
+            for (int j = 0 ; j < TAM_TABULEIRO ; j++){
+                if (partida->tabuleiro[i][j] == partida->jogador && !avaliacao_silenciosa(&i, &j, partida)){
+                    semCapturas += 1;
+                }
+            }
+        }
+    }
+    if(!semCapturas)
+        return 3;
+        
+    if(partida->pecasJogador1 <= 0)
+        return 2;
+    else if(partida->pecasJogador2 <= 0)
+        return 1;
+
+    BarX = 0;
+    BarY = 0;
+    pecas = 0;
+    semCapturas = 0;
+    return 0;
+}*/
+
+// Helper function to check if a barrier splits the board
+bool verifica_barreira(jogo* partida, int y, int x) {
+    // Implement logic to check if the 5-piece line isolates the opponent
+    // For simplicity, you can flood-fill each side of the board and check if one side contains no opponent pieces
+    return true; // Placeholder: Return true for now
+}
+
+short verificaVitoria(jogo* partida) {
+    short adversario = (partida->jogador == 1) ? 2 : 1;
+    short semCapturas = 0;
+
+    // Total Victory: Check if the opponent has no pieces left
+    if (partida->pecasJogador1 <= 0) {
+        return 2; // Player 2 wins
+    } else if (partida->pecasJogador2 <= 0) {
+        return 1; // Player 1 wins
+    }
+
+/*
+    // Small Victory: Check for a 5-piece barrier
+    for (int y = 0; y < TAM_TABULEIRO; y++) {
+        int count = 0;
+        for (int x = 0; x < TAM_TABULEIRO; x++) {
+            if (partida->tabuleiro[y][x] == partida->jogador) {
+                count++;
+            } else {
+                count = 0;
+            }
+
+            if (count == 5) {
+                if (verifica_barreira(partida, y, x)) {
+                    return partida->jogador; // The current player wins with a small victory
+                }
+            }
+        }
+    }
+
+    for (int x = 0; x < TAM_TABULEIRO; x++) {
+        int count = 0;
+        for (int y = 0; y < TAM_TABULEIRO; y++) {
+            if (partida->tabuleiro[y][x] == partida->jogador) {
+                count++;
+            } else {
+                count = 0;
+            }
+
+            if (count == 5) {
+                if (verifica_barreira(partida, y, x)) {
+                    return partida->jogador; // The current player wins with a small victory
+                }
+            }
+        }
+    }
+*/
+    // Stalemate: Check if both players have <= 3 pieces and no valid captures exist
+    if (partida->pecasJogador1 <= 3 && partida->pecasJogador2 <= 3) {
+        for (int y = 0; y < TAM_TABULEIRO; y++) {
+            for (int x = 0; x < TAM_TABULEIRO; x++) {
+                if (partida->tabuleiro[y][x] == partida->jogador) {
+                    if (avaliacao_silenciosa_movimento(y, x, partida)) {
+                        semCapturas++;
+                    }
+                }
+            }
+        }
+
+        if (semCapturas == 0) {
+            return 3; // Stalemate
+        }
+    }
+
+    // No victory yet
+    return 0;
+}
+
 void fase2(jogo* partida){
     int direcoes[4][2] = {
         {-1, 0},  // Up
@@ -689,12 +834,13 @@ void fase2(jogo* partida){
     int pecaY = 0, pecaX = 0;
     bool pecaCapturada = 0;     // 1 se uma peça foi capturada nesse turno
     bool jogando = 1;           // Quando for 0 o jogo acabou
+    short vencedor = 0;         // Quem venceu a partida. 0 = ninguém, 3 = empate
     bool pecaSelecionada = 0;   // 0 se nenhuma peça foi selecionada
     bool destinoValido = 0;     // Flag para movimento válido
     int adversario = (partida->jogador == 1) ? 2 : 1;
     
     
-    while (jogando){
+    while (!vencedor){
         desenhaPosicoes(partida);
         d_Linha(3, 1, 0, 73, 97, 39, " ");
         printf("\033[1;75H\033[97;45mJogando:");
@@ -806,7 +952,10 @@ void fase2(jogo* partida){
                 printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
             }
         }
+        vencedor = verificaVitoria(partida);
     }
+    printf("\033[3;25HFIM DE JOGO! Vencedor é jogador %d!", vencedor);
+    getchar();
 }
 
 void fase2CPU(jogo* partida){
@@ -1104,6 +1253,10 @@ void desenhaHistorico(){
     fflush(stdin);
     desenhaMenuPrincipal();
     menuPrincipal();
+}
+
+void desenhaRegras(){
+    
 }
 
 void menuPrincipal() {
