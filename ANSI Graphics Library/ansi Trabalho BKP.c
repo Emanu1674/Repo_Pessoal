@@ -462,13 +462,13 @@ void avaliacao_direto(int* Y, int* X, jogo* partida) {
 }
 
 bool avaliacao_silenciosa(int* Y, int* X, jogo* partida){
-    int adversario = (partida->jogador == 1) ? 2 : 1;
     int direcoes[4][2] = {
         {-1, 0},  // Up
         {1, 0},   // Down
         {0, -1},  // Left
         {0, 1}    // Right
     };
+    int adversario = (partida->jogador == 1) ? 2 : 1;
 
     // Check if the current position belongs to the current player
     if (partida->tabuleiro[*Y][*X] == partida->jogador) {
@@ -479,7 +479,7 @@ bool avaliacao_silenciosa(int* Y, int* X, jogo* partida){
             if (dentroDoLimite(*Y + dy, *X + dx) &&
                 partida->tabuleiro[*Y + dy][*X + dx] == 0) {
                 int verdeX = *X + dx;
-                int verdeY = *Y + dy;
+                int verdeY = *Y + dy;   
 
                 // Check for possible captures in the same direction
                 for (int j = 0; j < 4; j++){
@@ -500,36 +500,6 @@ bool avaliacao_silenciosa(int* Y, int* X, jogo* partida){
         }
     }
     return 0;
-}
-
-bool avaliacao_silenciosa_captura(int Y, int X, jogo* partida){
-    int adversario = (partida->jogador == 1) ? 2 : 1;
-    int direcoes[4][2] = {
-        {-1, 0},
-        {1, 0},
-        {0, -1},
-        {0, 1}
-    };
-    for (int i = 0 ; i < 4 ; i++){
-        int dy = direcoes[i][0];
-        int dx = direcoes[i][1];
-
-        for (int j = 0; j < 4; j++){
-            int dy1 = direcoes[j][0]; 
-            int dx1 = direcoes[j][1];
-            int dy2 = 2 * direcoes[j][0];
-            int dx2 = 2 * direcoes[j][1];
-            if (dentroDoLimite(Y + dy1, X + dx1) &&
-                dentroDoLimite(Y + dy2, X + dx2)){
-                if (partida->tabuleiro[Y + dy1][X + dx1] == adversario &&
-                    partida->tabuleiro[Y + dy2][X + dx2] == partida->jogador &&
-                    !(Y + dy1 == 2 && X + dx1 == 2)){
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
 }
 
 void avaliacao_reseta(int* Y, int* X, jogo* partida){
@@ -613,29 +583,34 @@ void removePeca(int Y, int X, jogo* partida){
         int dy = direcoes[i][0];
         int dx = direcoes[i][1];
 
-        for (int j = 0; j < 4; j++){
-            int dy1 = direcoes[j][0]; 
-            int dx1 = direcoes[j][1];
-            int dy2 = 2 * direcoes[j][0];
-            int dx2 = 2 * direcoes[j][1];
-            if (dentroDoLimite(Y + dy1, X + dx1) &&
-                dentroDoLimite(Y + dy2, X + dx2)){
-                if (partida->tabuleiro[Y + dy1][X + dx1] == adversario &&
-                    partida->tabuleiro[Y + dy2][X + dx2] == partida->jogador &&
-                    !(Y + dy1 == 2 && X + dx1 == 2)){
-                    partida->tabuleiro[Y + dy1][X + dx1] = 0;
-                    if (partida->jogador == 1)
-                        partida->pecasJogador2 -= 1;
-                    else if (partida->jogador == 2)
-                        partida->pecasJogador1 -= 1;
-                    desenhaPosicao(Y + dy1, X + dx1, 30, 30);
-                    //d_Linha(25, 31, 0, 22, 96, 39, "█");
+        if (dentroDoLimite(Y + dy, X + dx) && partida->tabuleiro[Y + dy][X + dx] == 0){
+            for (int j = 0; j < 4; j++){
+                int dy1 = direcoes[j][0]; 
+                int dx1 = direcoes[j][1];
+                int dy2 = 2 * direcoes[j][0];
+                int dx2 = 2 * direcoes[j][1];
+
+                if (dentroDoLimite(Y + dy1, X + dx1) &&
+                    dentroDoLimite(Y + dy2, X + dx2)){
+
+                    if (partida->tabuleiro[Y + dy1][X + dx1] == adversario &&
+                        partida->tabuleiro[Y + dy2][X + dx2] == partida->jogador &&
+                        !(Y + dy1 == 2 && X + dx1 == 2)){
+                        partida->tabuleiro[Y + dy1][X + dx1] = 0;
+
+                        if(partida->jogador == 1)
+                            partida->pecasJogador2 -= 1;
+                        else if(partida->jogador == 2)
+                            partida->pecasJogador1 -= 1;
+
+                        desenhaPosicao(Y + dy1, X + dx1, 30, 30);
+                        d_Linha(25, 31, 0, 22, 96, 39, "█");
+                    }
                 }
             }
         }
     }
 }
-
 void fase2(jogo* partida){
     int destaque[5][5] = {
         {0, 0, 0, 0, 0},
@@ -674,7 +649,7 @@ void fase2(jogo* partida){
             selecionaPeca(&Y, &X, partida);
             d_Linha(25, 31, 0, 22, 96, 39, "█");
 
-            if (partida->tabuleiro[Y][X] == partida->jogador){
+            if(partida->tabuleiro[Y][X] == partida->jogador){
                 avaliacao_destaque(&Y, &X, partida, destaque);
                 } else {
                 printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
@@ -683,47 +658,46 @@ void fase2(jogo* partida){
             pecaSelecionada = 1;
             pecaY = Y;
             pecaX = X;
-
             selecionaPecaPosicao(&Y, &X, partida, destaque);
-            if (destaque[Y][X] == 2){
+            if(destaque[Y][X] == 2){
                 desenhaPosicao(pecaY, pecaX, 30, 30);
                 partida->tabuleiro[pecaY][pecaX] = 0;
                 partida->tabuleiro[Y][X] = partida->jogador;
 
                 removePeca(Y, X, partida);
-                memset(destaque, 0, sizeof(destaque));
-                pecaY = Y;
-                pecaX = X;
-
-                if (avaliacao_silenciosa(&Y, &X, partida)){
-                    do {
-                        desenhaPosicoes(partida);
-                        printf("\033[23;34H\033[31;106mMovimento Extra!\033[0m");
-
-                        avaliacao_direto(&Y, &X, partida);
-                        avaliacao_destaque(&Y, &X, partida, destaque);
-                        selecionaPecaPosicao(&Y, &X, partida, destaque);
-
-                        if (destaque[Y][X] == 2){
-                            d_Linha(25, 31, 0, 22, 96, 39, "█");
-                            printf("Seleção certa!");
-                            desenhaPosicao(pecaY, pecaX, 30, 30);
-                            partida->tabuleiro[pecaY][pecaX] = 0;
-                            partida->tabuleiro[Y][X] = partida->jogador;
-
-                            removePeca(Y, X, partida);
-                            memset(destaque, 0, sizeof(destaque));
-
-                            pecaY = Y;
-                            pecaX = X;
-                        } else {
-                            printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
-                            Y = pecaY;
-                            X = pecaX;
-                        }
-                    } while (avaliacao_silenciosa(&Y, &X, partida));
+                for(int i = 0 ; i < 5 ; i++){
+                    for(int j = 0 ; j < 5 ; j++)
+                        destaque[i][j] = 0;
                 }
-                desenhaPosicoes(partida);
+                pecaSelecionada = 0;
+                //pecaY = Y;
+                //pecaX = X;
+
+                while(avaliacao_silenciosa(&Y, &X, partida)){
+                    desenhaPosicoes(partida);
+                    printf("\033[23;34H\033[31;106mMovimento Extra!\033[0m");
+
+                    pecaSelecionada = 1;
+                    avaliacao_direto(&Y, &X, partida);
+                    avaliacao_destaque(&Y, &X, partida, destaque);
+                    selecionaPecaPosicao(&Y, &X, partida, destaque);
+                    if(destaque[Y][X] == 2){
+                        d_Linha(25, 31, 0, 22, 96, 39, "█");
+                        printf("Seleção certa!");
+
+                        removePeca(X, Y, partida);
+                        for(int i = 0 ; i < 5 ; i++){
+                            for(int j = 0 ; j < 5 ; j++)
+                                destaque[i][j] = 0;
+                        }
+                    } else {
+                        //Y = pecaY;
+                        //X = pecaX;
+                        printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
+                    }
+                    //pecaY = Y;
+                    //pecaX = X;
+                }
                 partida->jogador = (partida->jogador == 1) ? 2 : 1;
                 adversario = (partida->jogador == 1) ? 2 : 1;
             } else {
