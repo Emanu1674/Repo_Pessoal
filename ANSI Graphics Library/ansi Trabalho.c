@@ -44,6 +44,7 @@ void desenhaMenuLateral();
 void desenhaHistorico();
 void desenhaTabuleiro(jogo *_partida);
 void desenhaPosicao(int _Y, int _X, int _Cor, int _corFundo);
+void desenhaPosicoes(jogo* _partida);
 
 void menuPrincipal();
 void menuNovoJogo();
@@ -54,10 +55,9 @@ void fase1CPU(jogo* _partida);
 void fase2CPU(jogo* _partida);
 void CPUCriaPeca(int* _pY, int* _pX, jogo* partida);
 bool dentroDoLimite(int _Y, int _X);
-void checaMovimentoComCaptura(int _Y, int _X, int _corJogPossivel, int _corPecaCaptura, jogo* _partida, int _jogador, int _adversario);
-void checaCapturaFutura(int _novoY, int _novoX, int _corPecaCaptura, jogo* _partida, int _jogador, int _adversario);
-void avaliacao(int* _Y, int* _X, jogo* _partida);
-void avaliacaoReseta(int* _Y, int* _X, jogo* _partida);
+void avaliacao_destaque(int* _Y, int* _X, jogo* _partida, int _destaque[5][5]);
+void avaliacao_direto(int* _Y, int* _X, jogo* _partida);
+void avaliacao_reseta(int* _Y, int* _X, jogo* _partida);
 int selecionaPeca(int* _rY, int* _rX, jogo* _partida);
 int entradaTeclado(int* _rY, int* _rX, jogo* _partida);
 bool posicaoValida(int _Y, int _X, jogo* _partida);
@@ -91,6 +91,15 @@ void desenhaTabuleiro(jogo* partida){
     d_Pixel(16, 25, 97, 39, "D");
     d_Pixel(19, 25, 97, 39, "E");
     d_Retangulo_Preenchido(6, 26, 21, 57, 96, 30, "░");
+    desenhaPosicoes(partida);
+    d_Pixel(5, 29, 97, 39, "1");
+    d_Pixel(5, 35, 97, 39, "2");
+    d_Pixel(5, 41, 97, 39, "3");
+    d_Pixel(5, 47, 97, 39, "4");
+    d_Pixel(5, 53, 97, 39, "5");
+}
+
+void desenhaPosicoes(jogo* partida){
     for(int i = 0 ; i <= 4 ; i++){
         for(int j = 0 ; j <= 4 ; j++){
             if(partida->tabuleiro[i][j] == 0)
@@ -101,11 +110,6 @@ void desenhaTabuleiro(jogo* partida){
                 d_Retangulo(LN+1 + (i*3), COL+2 + (j*6), LN+2 + (i*3), COL+5 + (j*6), COR_JGDR_2, 30, "█");
         }
     }
-    d_Pixel(5, 29, 97, 39, "1");
-    d_Pixel(5, 35, 97, 39, "2");
-    d_Pixel(5, 41, 97, 39, "3");
-    d_Pixel(5, 47, 97, 39, "4");
-    d_Pixel(5, 53, 97, 39, "5");
 }
 
 void desenhaPosicao(int Y, int X, int Cor, int corFundo){
@@ -113,7 +117,6 @@ void desenhaPosicao(int Y, int X, int Cor, int corFundo){
 }
 
 int selecionaPeca(int* rY, int* rX, jogo* partida){
-    int tabuleiro[5][5];
     int Y = *rY;
     int X = *rX;
     int cor = 0;
@@ -135,44 +138,44 @@ int selecionaPeca(int* rY, int* rX, jogo* partida){
             switch (tecla) {
                 case 72:    // Cima
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
-                    avaliacaoReseta(&Y, &X, partida);
+                    avaliacao_reseta(&Y, &X, partida);
                     Y -= 1;
                     if(Y < 0)
                         Y = 4;
                     //getch();
-                    avaliacao(&Y, &X, partida);
+                    avaliacao_direto(&Y, &X, partida);
                     break;
                 case 80:    // Baixo
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
-                    avaliacaoReseta(&Y, &X, partida);                                        
+                    avaliacao_reseta(&Y, &X, partida);                                        
                     Y += 1;
                     if(Y > 4)
                         Y = 0;
                     //getch();
-                    avaliacao(&Y, &X, partida);
+                    avaliacao_direto(&Y, &X, partida);
                     break;
                 case 75:    // Esquerda
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
-                    avaliacaoReseta(&Y, &X, partida); 
+                    avaliacao_reseta(&Y, &X, partida); 
                     X -= 1;
                     if(X < 0)
                         X = 4;
                     //getch();
-                    avaliacao(&Y, &X, partida);
+                    avaliacao_direto(&Y, &X, partida);
                     break;
                 case 77:    // Direita
                     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
-                    avaliacaoReseta(&Y, &X, partida);
+                    avaliacao_reseta(&Y, &X, partida);
                     X += 1;
                     if(X > 4)
                         X = 0;    
                     //getch();
-                    avaliacao(&Y, &X, partida);
+                    avaliacao_direto(&Y, &X, partida);
                     break;
                 default:
                     continue;
             }
-        }
+        } 
     }
     
     d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor, cor, "█");
@@ -181,8 +184,65 @@ int selecionaPeca(int* rY, int* rX, jogo* partida){
     *rX = X;
 }
 
+int selecionaPecaPosicao(int* rY, int* rX, jogo* partida, int destaque[5][5]){
+    int Y = *rY;
+    int X = *rX;
+    int cor = 0;
+    int tecla = 0;
+
+        while(tecla != 13){
+            if (destaque[Y][X] == 3) {
+                cor = 35; // Purple
+            } else if (destaque[Y][X] == 2) {
+                cor = 32; // Green
+            } else if (destaque[Y][X] == 1) {
+                cor = 33; // Yellow
+            } else if (partida->tabuleiro[Y][X] == 0) {
+                cor = 30; // Empty
+            } else if (partida->tabuleiro[Y][X] == 2) {
+                cor = COR_JGDR_2; // Player 2
+            } else if (partida->tabuleiro[Y][X] == 1) {
+                cor = COR_JGDR_1; // Player 1
+            }
+
+            d_Retangulo_Preenchido(LN+1 + Y*3, COL+2 + X*6, LN+2 + Y*3, COL+5 + X*6, cor+60, cor+60, "█");
+
+            tecla = getch();
+            if (tecla == 0 || tecla == 224) {
+                tecla = getch();
+                int prevY = Y, prevX = X;
+
+                switch (tecla) {
+                    case 72: Y = (Y - 1 + 5) % 5; break; // Up
+                    case 80: Y = (Y + 1) % 5; break; // Down
+                    case 75: X = (X - 1 + 5) % 5; break; // Left
+                    case 77: X = (X + 1) % 5; break; // Right
+                }
+
+                // Reset the color of the previous square
+                int prevCor;
+                if (destaque[prevY][prevX] == 3) {
+                    prevCor = 35; // Purple
+                } else if (destaque[prevY][prevX] == 2) {
+                    prevCor = 32; // Green
+                } else if (destaque[prevY][prevX] == 1) {
+                    prevCor = 33; // Yellow
+                } else if (partida->tabuleiro[prevY][prevX] == 0) {
+                    prevCor = 30; // Empty
+                } else if (partida->tabuleiro[prevY][prevX] == 2) {
+                    prevCor = COR_JGDR_2; // Player 2
+                } else if (partida->tabuleiro[prevY][prevX] == 1) {
+                    prevCor = COR_JGDR_1; // Player 1
+                }
+
+                d_Retangulo_Preenchido(LN+1 + prevY*3, COL+2 + prevX*6, LN+2 + prevY*3, COL+5 + prevX*6, prevCor, prevCor, "█");
+            }
+        }
+    *rY = Y;
+    *rX = X;
+}
+
 int entradaTeclado(int* rY, int* rX, jogo* partida){
-    int tabuleiro[5][5];
     int Y = *rY;
     int X = *rX;
     int cor = 0;
@@ -307,90 +367,101 @@ bool dentroDoLimite(int Y, int X) {
     return Y >= 0 && Y < TAM_TABULEIRO && X >= 0 && X < TAM_TABULEIRO;
 }
 
-void avaliacao(int* Y, int* X, jogo* partida){
-    int corJogPossivel = 32;
-    int corPecaCaptura = 35;
-    int adversario;
+void testDentroDoLimite() {
+    printf("Testing dentroDoLimite function...\n");
+    printf("dentroDoLimite(-1, 0): %d (expected 0)\n", dentroDoLimite(-1, 0));
+    printf("dentroDoLimite(0, -1): %d (expected 0)\n", dentroDoLimite(0, -1));
+    printf("dentroDoLimite(0, 0): %d (expected 1)\n", dentroDoLimite(0, 0));
+    printf("dentroDoLimite(4, 4): %d (expected 1)\n", dentroDoLimite(4, 4));
+    printf("dentroDoLimite(5, 0): %d (expected 0)\n", dentroDoLimite(5, 0));
+    printf("dentroDoLimite(0, 5): %d (expected 0)\n", dentroDoLimite(0, 5));
+}
 
-    adversario = (partida->jogador == 1) ? 2 : 1;
+void avaliacao_destaque(int* Y, int* X, jogo* partida, int destaque[5][5]){
+    int direcoes[4][2] = {
+        {-1, 0},  // Up
+        {1, 0},   // Down
+        {0, -1},  // Left
+        {0, 1}    // Right
+    };
+    int adversario = (partida->jogador == 1) ? 2 : 1;
 
-    if(partida->tabuleiro[*Y][*X] == partida->jogador){
-        if(partida->tabuleiro[*Y-1][*X] == 0 && (*Y-1 >= 0)){
-            desenhaPosicao(*Y-1, *X, corJogPossivel, corJogPossivel);
-            if(partida->tabuleiro[*Y-1][*X-2] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y-1][*X-1] == adversario && (*Y-1 != 2 || *X-1 != 2)){
-            if(dentroDoLimite(*Y-1, *X-1))
-                desenhaPosicao(*Y-1, *X-1, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y-3][*X] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y-2][*X] == adversario && (*Y-2 != 2 || *X != 2)){
-            if(dentroDoLimite(*Y-2, *X))
-                desenhaPosicao(*Y-2, *X, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y-1][*X+2] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y-1][*X+1] == adversario && (*Y-1 != 2 || *X+1 != 2)){
-            if(dentroDoLimite(*Y-1, *X+1))
-                desenhaPosicao(*Y-1, *X+1, corPecaCaptura, corPecaCaptura);
-            }
-        }
-        if(partida->tabuleiro[*Y+1][*X] == 0 && (*Y+1 <= 4)){
-            desenhaPosicao(*Y+1, *X, corJogPossivel, corJogPossivel);
-            if(partida->tabuleiro[*Y+1][*X+2] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y+1][*X+1] == adversario && (*Y+1 != 2 || *X+1 != 2)){
-            if(dentroDoLimite(*Y+1, *X+1))
-                desenhaPosicao(*Y+1, *X+1, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y+3][*X] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y+2][*X] == adversario && (*Y+2 != 2 || *X != 2)){
-            if(dentroDoLimite(*Y+2, *X))
-                desenhaPosicao(*Y+2, *X, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y+1][*X-2] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y+1][*X-1] == adversario && (*Y+1 != 2 || *X-1 != 2)){
-            if(dentroDoLimite(*Y+1, *X-1))
-                desenhaPosicao(*Y+1, *X-1, corPecaCaptura, corPecaCaptura);
-            }
-        }
-        if(partida->tabuleiro[*Y][*X-1] == 0 && (*X-1 >= 0)){
-            desenhaPosicao(*Y, *X-1, corJogPossivel, corJogPossivel);
-            if(partida->tabuleiro[*Y+2][*X-1] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y+1][*X-1] == adversario && (*Y+1 != 2 || *X-1 != 2)){
-            if(dentroDoLimite(*Y+1, *X-1))
-                desenhaPosicao(*Y+1, *X-1, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y][*X-3] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y][*X-2] == adversario && (*Y != 2 || *X-2 != 2)){
-            if(dentroDoLimite(*Y, *X-2))
-                desenhaPosicao(*Y, *X-2, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y-2][*X-1] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y-1][*X-1] == adversario && (*Y-1 != 2 || *X-1 != 2)){
-            if(dentroDoLimite(*Y-1, *X-1))
-                desenhaPosicao(*Y-1, *X-1, corPecaCaptura, corPecaCaptura);
-            }
-        }
-        if(partida->tabuleiro[*Y][*X+1] == 0 && (*X+1 <= 4)){
-            desenhaPosicao(*Y, *X+1, corJogPossivel, corJogPossivel);
-            if(partida->tabuleiro[*Y+2][*X+1] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y+1][*X+1] == adversario && (*Y+1 != 2 || *X+1 != 2)){
-            if(dentroDoLimite(*Y+1, *X+1))
-                desenhaPosicao(*Y+1, *X+1, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y][*X+3] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y][*X+2] == adversario && (*Y != 2 || *X+2 != 2)){
-            if(dentroDoLimite(*Y, *X+2))
-                desenhaPosicao(*Y, *X+2, corPecaCaptura, corPecaCaptura);
-            }
-            if(partida->tabuleiro[*Y-2][*X+1] == partida->jogador && dentroDoLimite(*Y, *X) &&
-            partida->tabuleiro[*Y-1][*X+1] == adversario && (*Y-1 != 2 || *X+1 != 2)){
-            if(dentroDoLimite(*Y-1, *X+1))
-                desenhaPosicao(*Y-1, *X+1, corPecaCaptura, corPecaCaptura);
+    if (partida->tabuleiro[*Y][*X] == partida->jogador) {
+        destaque[*Y][*X] = 1;
+        for (int i = 0; i < 4; i++) {
+            int dy = direcoes[i][0];
+            int dx = direcoes[i][1];    
+
+            if (dentroDoLimite(*Y + dy, *X + dx) &&
+                partida->tabuleiro[*Y + dy][*X + dx] == 0) {
+                destaque[*Y + dy][*X + dx] = 2;
+                int verdeX = *X + dx;
+                int verdeY = *Y + dy;   
+
+
+                for (int j = 0; j < 4; j++){
+                    int dy1 = direcoes[j][0];
+                    int dx1 = direcoes[j][1];
+                    int dy2 = 2 * direcoes[j][0];
+                    int dx2 = 2 * direcoes[j][1];   
+
+                    if (dentroDoLimite(verdeY + dy1, verdeX + dx1) &&
+                        dentroDoLimite(verdeY + dy2, verdeX + dx2) &&
+                        partida->tabuleiro[verdeY + dy1][verdeX + dx1] == adversario &&
+                        partida->tabuleiro[verdeY + dy2][verdeX + dx2] == partida->jogador &&
+                        (verdeY + dy1 != 2 || verdeX + dx1 != 2)) {
+                            destaque[verdeY + dy1][verdeX + dx1] = 3;
+                    }
+                }
             }
         }
     }
 }
 
-void avaliacaoReseta(int* Y, int* X, jogo* partida){
+void avaliacao_direto(int* Y, int* X, jogo* partida) {
+    int direcoes[4][2] = {
+        {-1, 0},  // Up
+        {1, 0},   // Down
+        {0, -1},  // Left
+        {0, 1}    // Right
+    };
+    int adversario = (partida->jogador == 1) ? 2 : 1;
+
+    // Check if the current position belongs to the current player
+    if (partida->tabuleiro[*Y][*X] == partida->jogador) {
+        for (int i = 0; i < 4; i++) {
+            int dy = direcoes[i][0];
+            int dx = direcoes[i][1];    
+            // Check if adjacent position is within bounds and empty
+            if (dentroDoLimite(*Y + dy, *X + dx) &&
+                partida->tabuleiro[*Y + dy][*X + dx] == 0) {
+                // Highlight the valid movement position
+                desenhaPosicao(*Y + dy, *X + dx, 32, 32);
+                int verdeX = *X + dx;
+                int verdeY = *Y + dy;   
+
+                // Check for possible captures in the same direction
+                for (int j = 0; j < 4; j++){
+                    int dy1 = direcoes[j][0];
+                    int dx1 = direcoes[j][1];
+                    int dy2 = 2 * direcoes[j][0];
+                    int dx2 = 2 * direcoes[j][1];   
+
+                    if (dentroDoLimite(verdeY + dy1, verdeX + dx1) &&
+                        dentroDoLimite(verdeY + dy2, verdeX + dx2) &&
+                        partida->tabuleiro[verdeY + dy1][verdeX + dx1] == adversario &&
+                        partida->tabuleiro[verdeY + dy2][verdeX + dx2] == partida->jogador &&
+                        (verdeY + dy1 != 2 || verdeX + dx1 != 2)) {
+                        // Highlight the position of the capturable piece
+                        desenhaPosicao(verdeY + dy1, verdeX + dx1, 35, 35);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void avaliacao_reseta(int* Y, int* X, jogo* partida){
     int corCapturaOrig;
     int adversario;
     
@@ -400,133 +471,89 @@ void avaliacaoReseta(int* Y, int* X, jogo* partida){
     if(partida->tabuleiro[*Y-1][*X] == 0 && (*Y-1 >= 0)){
         desenhaPosicao(*Y-1, *X, 30, 30);
         if(partida->tabuleiro[*Y-1][*X-2] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
+        if(dentroDoLimite(*Y-1, *X-1))
             desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y-3][*X] == partida->jogador && partida->tabuleiro[*Y-2][*X] == adversario){
+        if(dentroDoLimite(*Y-1, *X))
             desenhaPosicao(*Y-2, *X, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y-1][*X+2] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
+        if(dentroDoLimite(*Y-1, *X+1))
             desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
         }
     }
     if(partida->tabuleiro[*Y+1][*X] == 0 && (*Y+1 <= 4)){
         desenhaPosicao(*Y+1, *X, 30, 30);
         if(partida->tabuleiro[*Y+1][*X+2] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
+        if(dentroDoLimite(*Y+1, *X+1))
              desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y+3][*X] == partida->jogador && partida->tabuleiro[*Y+2][*X] == adversario){
+        if(dentroDoLimite(*Y+2, *X))
             desenhaPosicao(*Y+2, *X, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y+1][*X-2] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
+        if(dentroDoLimite(*Y+1, *X-1))
             desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
         }
     }
     if(partida->tabuleiro[*Y][*X-1] == 0 && (*X-1 >= 0)){
         desenhaPosicao(*Y, *X-1, 30, 30);
         if(partida->tabuleiro[*Y+2][*X-1] == partida->jogador && partida->tabuleiro[*Y+1][*X-1] == adversario){
+        if(dentroDoLimite(*Y+1, *X-1))
             desenhaPosicao(*Y+1, *X-1, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y][*X-3] == partida->jogador && partida->tabuleiro[*Y][*X-2] == adversario){
+        if(dentroDoLimite(*Y, *X-2))
             desenhaPosicao(*Y, *X-2, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y-2][*X-1] == partida->jogador && partida->tabuleiro[*Y-1][*X-1] == adversario){
+        if(dentroDoLimite(*Y-1, *X-1))
             desenhaPosicao(*Y-1, *X-1, corCapturaOrig, corCapturaOrig);
         }
     }
     if(partida->tabuleiro[*Y][*X+1] == 0 && (*X+1 <= 4)){
         desenhaPosicao(*Y, *X+1, 30, 30);
         if(partida->tabuleiro[*Y+2][*X+1] == partida->jogador && partida->tabuleiro[*Y+1][*X+1] == adversario){
+        if(dentroDoLimite(*Y+1, *X+1))
             desenhaPosicao(*Y+1, *X+1, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y][*X+3] == partida->jogador && partida->tabuleiro[*Y][*X+2] == adversario){
+        if(dentroDoLimite(*Y, *X+2))
             desenhaPosicao(*Y, *X+2, corCapturaOrig, corCapturaOrig);
         }
         if(partida->tabuleiro[*Y-2][*X+1] == partida->jogador && partida->tabuleiro[*Y-1][*X+1] == adversario){
+        if(dentroDoLimite(*Y-1, *X+1))
             desenhaPosicao(*Y-1, *X+1, corCapturaOrig, corCapturaOrig);
         }
     }
 }
 
-void mostraMovimentosValidos(int Y, int X, jogo* partida){
-    int adversario = (partida->jogador == 1) ? 2 : 1;
-
-    if (partida->tabuleiro[Y][X] == partida->jogador) {
-        // Define directions for movement: {dy, dx}
-        int direcoes[4][2] = {
-            {-1, 0}, // Up
-            {1, 0},  // Down
-            {0, -1}, // Left
-            {0, 1}   // Right
-        };
-
-        // Loop through all possible moves
-        for (int i = 0; i < 4; i++) {
-            int dy = direcoes[i][0];
-            int dx = direcoes[i][1];
-            int novoY = Y + dy;
-            int novoX = X + dx;
-        }
-    }
-}
-
-int isDestinoValido(int Y, int X, jogo *partida, int pecaY, int pecaX) {
-    // Define directions for movement: {dy, dx}
-    int direcoes[4][2] = {
-        {-1, 0}, // Up
-        {1, 0},  // Down
-        {0, -1}, // Left
-        {0, 1}   // Right
-    };
-
-    // Ensure the destination is within the bounds of the board
-    if (Y < 0 || Y >= TAM_TABULEIRO || X < 0 || X >= TAM_TABULEIRO) {
-        return 0; // Out of bounds
-    }
-
-    // Ensure the destination is empty
-    if (partida->tabuleiro[Y][X] != 0) {
-        return 0; // Destination is not empty
-    }
-
-    // Check if the destination is reachable (valid movement or capture)
-    for (int i = 0; i < 4; i++) {
-        int dy = direcoes[i][0];
-        int dx = direcoes[i][1];
-
-        // Check adjacent squares for valid movement
-        if (Y == pecaY + dy && X == pecaX + dx) {
-            return 1; // Valid move to an adjacent square
-        }
-
-        // Check for captures
-        int capturaY = pecaY + dy;
-        int capturaX = pecaX + dx;
-        int destinoCapturaY = capturaY + dy;
-        int destinoCapturaX = capturaX + dx;
-
-        // Ensure the capture follows game rules
-        if (Y == destinoCapturaY && X == destinoCapturaX) {
-            // Ensure there's an opponent piece to capture
-            if (partida->tabuleiro[capturaY][capturaX] == (partida->jogador == 1 ? 2 : 1)) {
-                return 1; // Valid capture move
-            }
-        }
-    }
-
-    // If none of the conditions are met, the destination is invalid
-    return 0;
-}
-
 void fase2(jogo* partida){
+    int direcoes[4][2] = {
+        {-1, 0},
+        {1, 0},
+        {0, -1},
+        {0, 1}
+    };
+    int destaque[5][5] = {
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    };
     int Y = 2, X = 2;
     int pecaY = 0, pecaX = 0;
     bool jogando = 1;           // Quando for 0 o jogo acabou
     bool pecaSelecionada = 0;   // 0 se nenhuma peça foi selecionada
     bool destinoValido = 0;     // Flag para movimento válido
+    int adversario = (partida->jogador == 1) ? 2 : 1;
     
     
-    while(jogando){
-        desenhaTabuleiro(partida);
+    while (jogando){
+        desenhaPosicoes(partida);
         d_Linha(3, 1, 0, 73, 97, 39, " ");
         printf("\033[1;75H\033[97;45mJogando:");
         printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
@@ -535,15 +562,69 @@ void fase2(jogo* partida){
         pecaSelecionada = 0;
         destinoValido = 0;
 
-        while(!pecaSelecionada){
+        while (!pecaSelecionada){
+            pecaSelecionada = 0;
             selecionaPeca(&Y, &X, partida);
-            if(partida->tabuleiro[Y][X] == partida->jogador){
+            d_Linha(25, 31, 0, 22, 96, 39, "█");
 
+            if(partida->tabuleiro[Y][X] == partida->jogador){
+                avaliacao_destaque(&Y, &X, partida, destaque);
+                } else {
+                printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
+                continue;
+            }
+            pecaSelecionada = 1;
+            pecaY = Y;
+            pecaX = X;
+            selecionaPecaPosicao(&Y, &X, partida, destaque);
+            if(destaque[Y][X] == 2){
+                desenhaPosicao(pecaY, pecaX, 30, 30);
+                partida->tabuleiro[pecaY][pecaX] = 0;
+                partida->tabuleiro[Y][X] = partida->jogador;
+
+                for (int i = 0 ; i < 4 ; i++){
+                    int dy = direcoes[i][0];
+                    int dx = direcoes[i][1];
+
+                    if (dentroDoLimite(Y + dy, X + dx) && partida->tabuleiro[Y + dy][X + dx] == 0){
+
+                        for (int j = 0; j < 4; j++){
+                            int dy1 = direcoes[j][0]; 
+                            int dx1 = direcoes[j][1];
+                            int dy2 = 2 * direcoes[j][0];
+                            int dx2 = 2 * direcoes[j][1];
+
+                            if (dentroDoLimite(Y + dy1, X + dx1) &&
+                                dentroDoLimite(Y + dy2, X + dx2)){
+
+                                if (partida->tabuleiro[Y + dy1][X + dx1] == adversario &&
+                                    partida->tabuleiro[Y + dy2][X + dx2] == partida->jogador &&
+                                    !(Y + dy1 == 2 && X + dx1 == 2)){
+                                    partida->tabuleiro[Y + dy1][X + dx1] = 0;
+
+                                    if(partida->jogador == 1)
+                                        partida->pecasJogador1 -=1;
+                                    else if(partida->jogador == 2)
+                                        partida->pecasJogador2 -=1;
+
+                                    desenhaPosicao(Y + dy1, X + dx1, 30, 30);
+                                }
+                            }
+                        }
+                    }
+                }
+                for(int i = 0 ; i < 5 ; i++){
+                    for(int j = 0 ; j < 5 ; j++)
+                        destaque[i][j] = 0;
+                }
+                partida->jogador = (partida->jogador == 1) ? 2 : 1;
+                adversario = (partida->jogador == 1) ? 2 : 1;
+            } else {
+                //d_Linha(25, 31, 0, 22, 96, 39, "█");
+                printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
             }
         }
-
     }
-    getchar();
 }
 
 void fase2CPU(jogo* partida){
@@ -554,7 +635,7 @@ void fase2CPU(jogo* partida){
     printf("\033[2;75H\033[97;45mJogador %d", partida->jogador);
     printf("\033[h\033[0m");
     while(1){
-        selecionaPeca(&Y, &X, partida);
+        //selecionaPeca(&Y, &X, partida);
     }
     getchar();
 }
@@ -587,7 +668,7 @@ void fase1(jogo* partida){
                         movimento_Valido = true;
                     } else {
                         d_Linha(25, 31, 0, 22, 96, 39, "█");
-                        printf("\033[25;31H\033[31;106mMovimento Inválido!\033[0m");
+                        printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
                     }
                 }
             } else { // Vez da CPU
@@ -604,7 +685,7 @@ void fase1(jogo* partida){
                         movimento_Valido = true;
                     } else {
                         d_Linha(25, 31, 0, 22, 96, 39, "█");
-                        printf("\033[25;31H\033[31;106mMovimento Inválido!\033[0m");
+                        printf("\033[25;32H\033[31;106mMovimento Inválido!\033[0m");
                     }
                 }
             }
@@ -678,8 +759,8 @@ void novoJogoInicializa(int modo){
     jogo partida = {
         .tabuleiro = {
             {0, 0, 0, 0, 0},
-            {0, 0, 0, 1, 2},
-            {0, 1, 0, 0, 0},
+            {0, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0}
         },
@@ -697,7 +778,7 @@ void novoJogoInicializa(int modo){
     desenhaTabuleiro(&partida);
 
     if(modo)
-        fase2(&partida);
+        fase1(&partida);
     else
         fase1CPU(&partida);
 }
