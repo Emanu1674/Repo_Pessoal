@@ -367,16 +367,6 @@ bool dentroDoLimite(int Y, int X) {
     return Y >= 0 && Y < TAM_TABULEIRO && X >= 0 && X < TAM_TABULEIRO;
 }
 
-void testDentroDoLimite() {
-    printf("Testing dentroDoLimite function...\n");
-    printf("dentroDoLimite(-1, 0): %d (expected 0)\n", dentroDoLimite(-1, 0));
-    printf("dentroDoLimite(0, -1): %d (expected 0)\n", dentroDoLimite(0, -1));
-    printf("dentroDoLimite(0, 0): %d (expected 1)\n", dentroDoLimite(0, 0));
-    printf("dentroDoLimite(4, 4): %d (expected 1)\n", dentroDoLimite(4, 4));
-    printf("dentroDoLimite(5, 0): %d (expected 0)\n", dentroDoLimite(5, 0));
-    printf("dentroDoLimite(0, 5): %d (expected 0)\n", dentroDoLimite(0, 5));
-}
-
 void avaliacao_destaque(int* Y, int* X, jogo* partida, int destaque[5][5]){
     int direcoes[4][2] = {
         {-1, 0},  // Up
@@ -611,6 +601,7 @@ void removePeca(int Y, int X, jogo* partida){
         }
     }
 }
+
 void fase2(jogo* partida){
     int destaque[5][5] = {
         {0, 0, 0, 0, 0},
