@@ -1,0 +1,36 @@
+Esse programa roda direto no terminal, e usa caracteres ANSI para gerar os gráficos. Antes de executar, tenha certeza de que o terminal está configurado para renderizar caracteres UTF-8 com acentuação e tenha um tamanho de pelo menos 90x25 caracteres. ANSI teoricamente funciona em Linux, mas não pude testar para ter certeza.
+
+Terminais em Linux teoricamente suportam UTF-8 e acentuação e já deve estar configurado por padrão. Em Windows, é necessário um emulador de terminal, como o Windows Terminal, e é preciso ativar a decodificação UTF-8 nas configurações de localização e região.
+
+Use as teclas de setas para controlar o jogo, e Enter para selecionar.
+
+Para navegar nos menus, é utlizada a função getch(), da biblioteca <conio.h>. Esta biblioteca era usada no MS-DOS para gerenciar entrada do teclado, e existe em Windows apenas por questão de compatibilidade. Ela não exite no Linux. A diferença entre getch e getchar é que getch retorna imediatamente após apertar uma tecla, enquanto getchar é necessário aguardar o usuário apertar enter.
+
+Para substituir a funcionalidade de getch em Linux, é possível utilizar a função getch.h da biblioteca <ncurses.h> instalando o package ncurses-dev.
+
+Também é possível configurar o terminal em um sistema Unix manualmente utilizando <termios.h> e implementar getch diretamente. Aqui está um exemplo de uma função retirada do Visual Studio que implementa getch em Linux (não testado):
+
+#include <unistd.h>
+#include <termios.h>
+
+char getch(void)
+{
+    char buf = 0;
+    struct termios old = {0};
+    fflush(stdout);
+    if(tcgetattr(0, &old) < 0)
+        perror("tcsetattr()");
+    old.c_lflag &= ~ICANON;
+    old.c_lflag &= ~ECHO;
+    old.c_cc[VMIN] = 1;
+    old.c_cc[VTIME] = 0;
+    if(tcsetattr(0, TCSANOW, &old) < 0)
+        perror("tcsetattr ICANON");
+    if(read(0, &buf, 1) < 0)
+        perror("read()");
+    old.c_lflag |= ICANON;
+    old.c_lflag |= ECHO;
+    if(tcsetattr(0, TCSADRAIN, &old) < 0)
+        perror("tcsetattr ~ICANON");
+    return buf;
+ }

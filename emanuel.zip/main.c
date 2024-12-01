@@ -24,6 +24,8 @@
 #define LN 6
 #define COL 26
 
+
+
 typedef struct{
     int hora, min, seg;
 } horario;
@@ -1941,6 +1943,7 @@ void menuCarregar(jogo* partida){
         break;
     }
 }
+
 
 int main(){
     srand(time(NULL));
