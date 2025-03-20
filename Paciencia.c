@@ -2,28 +2,30 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define S_DECK 52
 
 typedef struct{
-    int valor; // 0-13 (Ás -> Rei)
+    int valor; // 0-12 (Ás -> Rei)
     int naipe; // 0-3 (Paus, ouros, copas e espadas)
+    bool vazio; // identifica se a carta existe ou se é uma posição vazia. 1 = vazio, 0 = ocupada
+    bool virada;
 } Carta;
 
 typedef struct{
-    Carta pilha1[12];
-    Carta pilha2[12];
-    Carta pilha3[12];
-    Carta pilha4[12];
-    Carta pilha5[12];
-    Carta pilha6[12];
-    Carta pilha7[12];
+    Carta pilha[7][13];
+    Carta pilhaEstoque[24];
+    Carta pilhaDescarte[24];
+    Carta pilhaSaida[4][13];
+    Carta gabarito[4][13];
 } Mesa;
 
 void inicializaDeck(Carta* deck);
 void embaralhaCartas(Carta* deck, int size);
-void jogoLoop(Carta* deck, Mesa* jogo);
-void imprimeJogo(Carta* deck, Mesa* jogo);
+void jogoLoop(Mesa* jogo);
+void imprimeEstoque(Mesa* jogo);
+void imprimeJogo(Mesa* jogo);
 
 void imprimirCarta(Carta deck);
 void imprimirDeck(Carta* deck);
@@ -31,7 +33,7 @@ void imprimirCartaComoNumero(Carta* deck, int Indice);
 void imprimirDeckComoNumeros(Carta* deck);
 
 // Imprime uma carta específica
-void imprimirCarta(Carta deck) {
+void imprimirCarta(Carta deck){
     // Vetores usados apenas para imprimir as cartas na tela
     char* deckNomes[13] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
     char* deckNaipes[4] = {u8"♣", u8"♦", u8"♥", u8"♠"}; // Paus, ouros, copas e espadas
@@ -40,7 +42,7 @@ void imprimirCarta(Carta deck) {
 }
 
 // Imprime uma carta específica, mas como um número
-void imprimirCartaComoNumero(Carta* deck, int Indice) {
+void imprimirCartaComoNumero(Carta* deck, int Indice){
     int cartaNumero = deck[Indice].valor + 1 + (deck[Indice].naipe * 13); // Converte valor/naipe para 1-52
     printf("%02d ", cartaNumero);
     if ((Indice + 1) % 13 == 0) printf("\n");
@@ -55,7 +57,7 @@ void imprimirDeck(Carta* deck){
 }
 
 // Imprime o deck inteiro, mas como números
-void imprimirDeckComoNumeros(Carta* deck) {
+void imprimirDeckComoNumeros(Carta* deck){
     for (int i = 0; i < S_DECK; i++) {
         int cartaNumero = deck[i].valor + 1 + (deck[i].naipe * 13); // Converte valor/naipe para 1-52
         printf("%02d ", cartaNumero);
@@ -66,8 +68,9 @@ void imprimirDeckComoNumeros(Carta* deck) {
 // Inicializa o deck de cartas, com todas as cartas e naipes em ordem de A até Rei
 void inicializaDeck(Carta* deck){
     for(int i = 0 ; i < S_DECK ; i++){
-        deck[i].valor = i % 13; // 0 a 13 (Ás -> Rei)
-        deck[i].naipe = i / 13; // 0 a 3 (Paus, ouros, copas e espadas)
+        deck[i].valor = i % 13; // 0 - 13 (Ás -> Rei)
+        deck[i].naipe = i / 13; // 0 - 3 (Paus, ouros, copas e espadas)
+        deck[i].vazio = 0;       // posição é uma carta válida
     }
 }
 
@@ -88,108 +91,164 @@ void embaralhaCartas(Carta* deck, int size){
     }
 }
 
-void gerarFilas(Carta* deck){
+void gerarFilas(Carta* deck, Carta* deckNovo){
     // Struct com as pilhas de jogo
     static Mesa jogo;
+    int deckIndice = 0;
 
-    jogo.pilha1[0] = deck[0];
-    jogo.pilha2[0] = deck[1];
-    jogo.pilha3[0] = deck[2];
-    jogo.pilha4[0] = deck[3];
-    jogo.pilha5[0] = deck[4];
-    jogo.pilha6[0] = deck[5];
-    jogo.pilha7[0] = deck[6];
+    // Inicializa pilhas como vazias primeiro
+    for (int i = 0; i < 7; i++){
+        for (int j = 0; j < 13; j++){
+            jogo.pilha[i][j].vazio = 1; // Posição vazia
+        }
+    }
 
-    jogo.pilha2[1] = deck[7];
-    jogo.pilha3[1] = deck[8];
-    jogo.pilha4[1] = deck[9];
-    jogo.pilha5[1] = deck[10];
-    jogo.pilha6[1] = deck[11];
-    jogo.pilha7[1] = deck[12];
+    // Inicializa pilha de descarte como vazia
+    for (int i = 0; i < 24; i++){
+        jogo.pilhaDescarte[i].vazio = 1; // Posição vazia
+    }
 
-    jogo.pilha3[2] = deck[13];
-    jogo.pilha4[2] = deck[14];
-    jogo.pilha5[2] = deck[15];
-    jogo.pilha6[2] = deck[16];
-    jogo.pilha7[2] = deck[17];
+    // Inicializa o gabarito do jogo como cheio
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 13; j++){
+            jogo.gabarito[i][j].vazio = 0; // Posição ocupada
+        }
+    }
 
-    jogo.pilha4[3] = deck[18];
-    jogo.pilha5[3] = deck[19];
-    jogo.pilha6[3] = deck[20];
-    jogo.pilha7[3] = deck[21];
+    // Prepara o gabarito do jogo
+    int k = 0;
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 13; j++){
+            jogo.gabarito[i][j].valor = deckNovo[k].valor; // Copia valor de deckNovo
+            jogo.gabarito[i][j].naipe = deckNovo[k].naipe; // Copia naipe de deckNovo
+            k++;
+        }
+    }
 
-    jogo.pilha5[4] = deck[22];
-    jogo.pilha6[4] = deck[23];
-    jogo.pilha7[4] = deck[24];
+    // Distribui cartas uma por uma
+    int cartasColocadas = 0;
+    int volta = 0;
+    while (cartasColocadas < 28){  // Primeiras 28 cartas são distribuidas
+        for (int i = volta; i < 7 && cartasColocadas < 28; i++) {  
+            jogo.pilha[i][volta] = deck[deckIndice++];
+            jogo.pilha[i][volta].vazio = 0; // Essa posição tem uma carta
+            cartasColocadas++;
+        }
+        volta++;
+    }
 
-    jogo.pilha6[5] = deck[25];
-    jogo.pilha7[5] = deck[26];
+    // Coloca as 24 cartas que sobram na pilha de estoque
+    for (int i = 0; i < 24; i++) {
+        jogo.pilhaEstoque[i] = deck[deckIndice++];
+        jogo.pilhaEstoque[i].vazio = 0; // Pilha de estoque cheia no começo
+    }
 
-    jogo.pilha7[6] = deck[27];
-
-    jogoLoop(deck, &jogo);
+    // Inicia o Loop do jogo
+    jogoLoop(&jogo);
 }
 
-void jogoLoop(Carta* deck, Mesa* jogo){
-    imprimeJogo(deck, jogo);
+void jogoLoop(Mesa* jogo){
+
+
+// Imprime o jogo
+    imprimeJogo(jogo);
+    
+// Imprime pilha de Estoque
+    imprimeEstoque(jogo);
+    printf("\n");
+
+// [DEBUG] Imprime gabarito
+    for (int i = 0; i < 4; i++){
+        printf("\n");
+        for (int j = 0; j < 13; j++){
+            imprimirCarta(jogo->gabarito[i][j]);
+        }
+    }
+
+    // TODO: imprimir pilha de descarte
+    // CODE
+    
+    // TODO: imprimir pilha de saída
+    // CODE
+
+    // TODO: Lógica de jogo
+    // CODE
+    // {REPETIR ATÉ O JOGO ACABAR OU SEM MOVIMENTOS POSSÍVEIS}
+
+    // TODO: Imprimir lista de movimentos
+    // imprimir "FIM" na tela
+
+    // Fim do jogo
 }
 
-void imprimeJogo(Carta* deck, Mesa* jogo){
-    printf("\033[s");
-    printf("Pilha de jogo 1: ");
-    for(int i = 0 ; i < 1 ; i++){
-        imprimirCarta(jogo->pilha1[i]);
+void imprimeEstoque(Mesa* jogo) {
+    printf("\nPilha de Estoque: ");
+
+    // Encontra a última carta na lista
+    int lastIndex = -1;
+    for (int i = 23; i >= 0; i--) {
+        if (!jogo->pilhaEstoque[i].vazio) {
+            lastIndex = i;
+            break;
+        }
     }
-    printf("\033[1E");
-    printf("Pilha de jogo 2: ");
-    for(int i = 0 ; i < 2 ; i++){
-        imprimirCarta(jogo->pilha2[i]);
+
+    // Se não tem mais cartas, imprime uma pilha vazia
+    if (lastIndex == -1) {
+        printf("[Vazio]\n");
+        return;
     }
-    printf("\033[1E");
-    printf("Pilha de jogo 3: ");
-    for(int i = 0 ; i < 3 ; i++){
-        imprimirCarta(jogo->pilha3[i]);
+
+    // Imprime "..." se tem mais de 4 cartas
+    if (lastIndex > 3) {
+        printf("... ");
     }
-    printf("\033[1E");
-    printf("Pilha de jogo 4: ");
-    for(int i = 0 ; i < 4 ; i++){
-        imprimirCarta(jogo->pilha4[i]);
+
+    // Imprime as últimas 4 cartas (se faltam 4 cartas ou menos)
+    int start = lastIndex - 3 < 0 ? 0 : lastIndex - 3;
+    for (int i = start; i <= lastIndex; i++) {
+        imprimirCarta(jogo->pilhaEstoque[i]);
     }
-    printf("\033[1E");
-    printf("Pilha de jogo 5: ");
-    for(int i = 0 ; i < 5 ; i++){
-        imprimirCarta(jogo->pilha5[i]);
-    }
-    printf("\033[1E");
-    printf("Pilha de jogo 6: ");
-    for(int i = 0 ; i < 6 ; i++){
-        imprimirCarta(jogo->pilha6[i]);
-    }
-    printf("\033[1E");
-    printf("Pilha de jogo 7: ");
-    for(int i = 0 ; i < 7 ; i++){
-        imprimirCarta(jogo->pilha7[i]);
+
+    printf("\n");
+}
+
+void imprimeJogo(Mesa* jogo){
+    printf("\033[s"); // Salva posição do cursor (código escape ANSI)
+
+    // Imprime as 7 pilhas
+
+    for (int i = 0; i < 7; i++){
+        printf("Pilha de jogo %d: ", i + 1);
+        for (int j = 0; j <= i; j++) { // Só imprime o número correto de cartas por pilha
+            if (!jogo->pilha[i][j].vazio) { 
+                imprimirCarta(jogo->pilha[i][j]);
+            }
+        }
+        printf("\033[1E"); // Move cursor 1 linha para baixo (ANSI escape)
     }
 }
 
 
 int main(){
-    // Struct com as cartas do jogo
-    static Carta deck[S_DECK];
+// Structs com as cartas do jogo
+    static Carta deckNovo[S_DECK];
+    Carta deck[S_DECK];
 
-    // Inicializa deck com 1-52
+// Inicializa deck com 1-52
     inicializaDeck(deck);
+    inicializaDeck(deckNovo);
 
-    // Imprimir deck na tela (debug)
+// [DEBUG] Imprimir deck na tela
     //printf("\nDeck original:\n");
     //imprimirDeck(deck);
     //printf("\nDeck original (Números):\n");
     //imprimirDeckComoNumeros(deck);
 
-    // Embaralhar deck
+// Embaralhar deck
     embaralhaCartas(deck, S_DECK);
 
-    // Imprimir deck na tela (debug)
+// [DEBUG] Imprimir deck na tela
     //printf("\nDeck Embaralhado:\n");
     //imprimirDeck(deck);
     //printf("\n");
@@ -198,7 +257,7 @@ int main(){
     //printf("\nCarta na posição 6:\n");
     //imprimirCartaComoNumero(deck, 5);
 
-    gerarFilas(deck);
+    gerarFilas(deck, deckNovo);
 
     return 0;
 }
