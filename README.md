@@ -69,14 +69,14 @@ This is a repo for all the random stuff i'm currently working on that are not ri
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Everything here is experimental and there is no guarantee any of this will ever become an actual thing. If you want to use anything here, i recommend waiting for it to get a dedicated repo and proper documentation, buy you are free to use anything here. If you find and want to use something that is not mine, look for the original source on the Acknowledgments section, if there is any.
+Everything here is experimental and there is no guarantee any of this will ever become an actual thing. If you want to use anything here, i recommend waiting for it to get a dedicated repo and proper documentation, but you are free to use anything here. If you find and want to use something that is not mine, look for the original source on the Acknowledgments section, if there is any.
 
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-There is no documentation or tutorial about anything here. Writing doc would be pointless, as it's all very volatile and "alpha". If you want to use something that you thought was cool, you are free to do it under CC BY-NC but i recommend waiting for proper binaries and documentation.
+There is no documentation or tutorial about anything here. Writing doc would be pointless, as everything is very volatile and "alpha". If you want to use something that you thought was cool, you are free to do it under CC BY-NC but i recommend waiting for proper binaries and documentation.
 
 
 
@@ -90,7 +90,7 @@ There is no documentation or tutorial about anything here. Writing doc would be 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-This repo is not directly open to contributions. There is no guarantee anything heve will ever see the light of day. You CAN however, fork this repo and play around with it if you want, as long as you follow CC BY-NC.
+This repo is not directly open to contributions at this time. There is no guarantee anything here will ever see the light of day. You CAN however, fork this repo and play around with it if you want, as long as you follow CC BY-NC.
 
 If you really want to contribute something, check any of the public projects i have. They all (or most) have contributions enabled, and i'll probably remember to commit the changes. Maybe. Eventually.
 
