@@ -1,10 +1,12 @@
 
-/*  d_ = Data (assets, tables, static data) / d_sprite.c
- * cl_ = Client-side logic                  / cl_main.c
- *  r_ = Renderer / visual output           / r_main.c
+ /* cl_ = Client-side logic                  / cl_main.c
+ *  dl_ = Data Structures implementation     / ds_tree.c
+ *  d_ = Data (assets, tables, static data)  / d_sprite.c
+ *  r_ = Renderer / visual output            / r_raymarch.c
  *  g_ = Game logic
  *  c_ = Console / Commands
  *  f_ = File handling
+ *  l_ = Main program loop and other related files
  *  i_ = Initialize / Interface
  *  e_ = Error handling
  *  m_ = Miscellaneous / Memory / Math
