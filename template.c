@@ -1,6 +1,6 @@
 
  /* cl_ = Client-side logic                  / cl_main.c
- *  dl_ = Data Structures implementation     / ds_tree.c
+ *  ds_ = Data Structures implementation     / ds_tree.c
  *  d_ = Data (assets, tables, static data)  / d_sprite.c
  *  r_ = Renderer / visual output            / r_raymarch.c
  *  g_ = Game logic
